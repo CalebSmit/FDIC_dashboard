@@ -4,8 +4,16 @@ A single-file dashboard for comparing a bank against its peers using live FDIC
 Call Report data. Built for Peoples Bank (Rock Valley, Iowa — FDIC cert 16265),
 but any FDIC-insured institution can be searched at runtime.
 
-**[`FDIC_Peer_Dashboard.html`](FDIC_Peer_Dashboard.html)** is the whole product.
-Download it and double-click. No install, no server, no build step, no account.
+### Two ways to use it
+
+**Open it in a browser** — <https://calebsmit.github.io/FDIC_dashboard/>
+
+**Or download and run it locally** —
+[`FDIC_Peer_Dashboard.html`](FDIC_Peer_Dashboard.html) is the whole product. Save
+it anywhere and double-click. No install, no server, no build step, no account.
+
+Both are the same file and behave identically. The hosted copy is convenient for
+sending a link; the local copy keeps working with no dependency on GitHub.
 
 ---
 
