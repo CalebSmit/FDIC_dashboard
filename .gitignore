@@ -1,0 +1,19 @@
+# Build scratch
+build/_*.py
+build/_*.js
+build/parts/*.bak
+
+# OS / editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# Internal FDIC peer-grouping export (work artifact, not needed to build)
+Select_a_Standard_Peer_Grouping_*.csv

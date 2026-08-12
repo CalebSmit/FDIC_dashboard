@@ -1,0 +1,968 @@
+[
+{
+"code": "TRPOWER",
+"label": "Number with fiduciary powers granted",
+"cat": "Structure & Powers",
+"unit": "num",
+"n": 2
+},
+{
+"code": "TREXER",
+"label": "Number with Fiduciary Power Exercised",
+"cat": "Structure & Powers",
+"unit": "num",
+"n": 3
+},
+{
+"code": "TRACT",
+"label": "Number with Fiduciary or Related Activity",
+"cat": "Structure & Powers",
+"unit": "num",
+"n": 4
+},
+{
+"code": "NFAA",
+"label": "Number of Fiduciary Accounts and Related Asset Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 5
+},
+{
+"code": "TFRA",
+"label": "Total Fiduciary and Related Assets",
+"cat": "Fiduciary Assets",
+"unit": "usd",
+"n": 6
+},
+{
+"code": "TIP",
+"label": "YTD Personal Trust and Agency Accounts",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 7
+},
+{
+"code": "TIEC",
+"label": "YTD Employee Benefit Defined Contribution",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 8
+},
+{
+"code": "TIEB",
+"label": "YTD Employee Benefit Defined Benefit",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 9
+},
+{
+"code": "TIOR",
+"label": "YTD Other Retirement Accounts",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 10
+},
+{
+"code": "TICA",
+"label": "YTD Corporate Trust and Agency",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 11
+},
+{
+"code": "TIMA",
+"label": "Investment Management and Investment Advisory Agency Accounts Income",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 12
+},
+{
+"code": "TIFE",
+"label": "Foundation and Endowment and Agency Accounts Income",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 13
+},
+{
+"code": "TIOF",
+"label": "YTD Other Trust and Agency Accounts",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 14
+},
+{
+"code": "TICS",
+"label": "YTD Custody and Safekeeping Agency Accounts",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 15
+},
+{
+"code": "TIR",
+"label": "YTD Other Trust Accounts",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 16
+},
+{
+"code": "IFIDUC",
+"label": "Fiduciary Activities",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 17
+},
+{
+"code": "TETOT",
+"label": "YTD Fiduciary Expense",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 18
+},
+{
+"code": "TNL",
+"label": "YTD Fiduciary Net Loss",
+"cat": "Losses & Recoveries",
+"unit": "usd",
+"n": 19
+},
+{
+"code": "TINTRA",
+"label": "YTD Fiduciary Intracompany Income",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 20
+},
+{
+"code": "TNI",
+"label": "YTD Net Fiduciary Income",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 21
+},
+{
+"code": "TITOTF",
+"label": "Memo: YTD Foreign Offices Total Fiduciary Gross Income",
+"cat": "Fiduciary Income",
+"unit": "usd",
+"n": 22
+},
+{
+"code": "TTMA",
+"label": "Managed Assets ($)",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 38
+},
+{
+"code": "TTNMA",
+"label": "Non-Managed Assets ($)",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 39
+},
+{
+"code": "TCAPAO",
+"label": "Principal Amount Outstanding Corporate Trust and Agency Accounts",
+"cat": "Fiduciary Assets",
+"unit": "usd",
+"n": 40
+},
+{
+"code": "TCANUM",
+"label": "Number of Corporate and Municipal Trusteeships Account Issues",
+"cat": "Fiduciary Assets",
+"unit": "num",
+"n": 41
+},
+{
+"code": "TCATNUM",
+"label": "Number of Transfer Agent, Registrar, Paying Agent and Other Corporate Agency Issues",
+"cat": "Fiduciary Assets",
+"unit": "num",
+"n": 42
+},
+{
+"code": "TCTOTNUM",
+"label": "Total Number of Collective investment Funds and Common Trust Funds",
+"cat": "Collective Investment Funds",
+"unit": "num",
+"n": 43
+},
+{
+"code": "TCTOTMV",
+"label": "Total Market Value of Collective investment Fund and Common Trust Funds",
+"cat": "Collective Investment Funds",
+"unit": "usd",
+"n": 44
+},
+{
+"code": "TCDEMV",
+"label": "Domestic Equity,Collective Investment & Common Trust Funds Total Market Value",
+"cat": "Collective Investment Funds",
+"unit": "usd",
+"n": 45
+},
+{
+"code": "TCIEMV",
+"label": "International/Global Equity, Collective Investment & Common Trust Funds Total Market Value",
+"cat": "Collective Investment Funds",
+"unit": "usd",
+"n": 46
+},
+{
+"code": "TCSBMV",
+"label": "Stock/Bond Blend. Collective Investment & Common Trust Funds Total Market Value",
+"cat": "Collective Investment Funds",
+"unit": "usd",
+"n": 47
+},
+{
+"code": "TCTBMV",
+"label": "Taxable Bond Total, Collective Investment & Common Trust Funds Market Value",
+"cat": "Collective Investment Funds",
+"unit": "usd",
+"n": 48
+},
+{
+"code": "TCMBMV",
+"label": "Municipal Bond, Collective Investment & Common Trust Funds Total Market Value",
+"cat": "Collective Investment Funds",
+"unit": "usd",
+"n": 49
+},
+{
+"code": "TCSTMV",
+"label": "Short-Term Investments/Money Market, Collective Investment & Common Trust Funds Total Market Value",
+"cat": "Collective Investment Funds",
+"unit": "usd",
+"n": 50
+},
+{
+"code": "TCSOMV",
+"label": "Specialty/Other, Collective Investment & Common Trust Funds Total Market Value",
+"cat": "Collective Investment Funds",
+"unit": "usd",
+"n": 51
+},
+{
+"code": "TCDENUM",
+"label": "Domestic Equity, Collective Investment & Common Trust Funds Number",
+"cat": "Collective Investment Funds",
+"unit": "num",
+"n": 52
+},
+{
+"code": "TCIENUM",
+"label": "International/Global Equity, Collective Investment & Common Trust Funds Number",
+"cat": "Collective Investment Funds",
+"unit": "num",
+"n": 53
+},
+{
+"code": "TCSBNUM",
+"label": "Stock/Bond Blend, Collective Investment & Common Trust Funds Number",
+"cat": "Collective Investment Funds",
+"unit": "num",
+"n": 54
+},
+{
+"code": "TCTBNUM",
+"label": "Taxable Bond, Collective Investment & Common Trust Funds Number",
+"cat": "Collective Investment Funds",
+"unit": "num",
+"n": 55
+},
+{
+"code": "TCMBNUM",
+"label": "Municipal Bond, Collective Investment & Common Trust Funds Number",
+"cat": "Collective Investment Funds",
+"unit": "num",
+"n": 56
+},
+{
+"code": "TCSTNUM",
+"label": "Short-Term Investments/Money Market, Collective Investment & Common Trust Funds Number",
+"cat": "Collective Investment Funds",
+"unit": "num",
+"n": 57
+},
+{
+"code": "TCSONUM",
+"label": "Specialty/Other,Collective Investment & Common Trust Funds Number",
+"cat": "Collective Investment Funds",
+"unit": "num",
+"n": 58
+},
+{
+"code": "TCANUMD",
+"label": "Number of Corporate Trust and Agency Account Issues in Default",
+"cat": "Fiduciary Assets",
+"unit": "num",
+"n": 59
+},
+{
+"code": "TCAPAOD",
+"label": "Amount of Corporate Trust and Agency Account Issues in Default",
+"cat": "Fiduciary Assets",
+"unit": "usd",
+"n": 60
+},
+{
+"code": "TPNMA",
+"label": "Non-Managed Assets: Personal Trust and Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 61
+},
+{
+"code": "TECNMA",
+"label": "Non-Managed Assets: Employee Benefit-Defined Contribution Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 62
+},
+{
+"code": "TEBNMA",
+"label": "Non-Managed Assets: Employee Benefit-Defined Benefit Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 63
+},
+{
+"code": "TORNMA",
+"label": "Non-Managed Assets: Other Retirement Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 64
+},
+{
+"code": "TCANMA",
+"label": "Non-Managed Assets: Corporate Trust and Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 65
+},
+{
+"code": "TIMNMA",
+"label": "Investment Management and Advisory Agency Accounts, Non-Managed Assets",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 66
+},
+{
+"code": "TFENMA",
+"label": "Non-Managed Assets: Foundation and Endowment Trust and Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 67
+},
+{
+"code": "TOFNMA",
+"label": "Non-Managed Assets: Other Fiduciary Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 68
+},
+{
+"code": "TCSNMA",
+"label": "Non-Managed Assets: Custody and Safekeeping Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 69
+},
+{
+"code": "TNMAF",
+"label": "Non-Managed Assets: Fiduciary Accounts Held in Foreign Offices",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 70
+},
+{
+"code": "TRHNMA",
+"label": "Non-Managed Assets: Individual Retirement,Health Savings and Similar Accounts, Non-Managed",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 71
+},
+{
+"code": "TPMA",
+"label": "Managed Assets: Personal Trust and Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 72
+},
+{
+"code": "TECMA",
+"label": "Managed Assets: Employee Benefit-Defined Contribution Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 73
+},
+{
+"code": "TEBMA",
+"label": "Managed Assets: Employee Benefit-Defined Benefit Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 74
+},
+{
+"code": "TORMA",
+"label": "Managed Assets: Other Employee Benefit and Retirement-Related Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 75
+},
+{
+"code": "TCAMA",
+"label": "Managed Assets: Corporate Trust and Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 76
+},
+{
+"code": "TIMMA",
+"label": "Investment Management and Investment Advisory Agency Accounts, Managed Assets",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 77
+},
+{
+"code": "TFEMA",
+"label": "Managed Assets: Foundation and Endowment Trust and Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 78
+},
+{
+"code": "TOFMA",
+"label": "Managed Assets: Other Fiduciary Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 79
+},
+{
+"code": "TMAF",
+"label": "Managed Assets: Memo: Fiduciary Accounts Held in Foreign Offices",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 80
+},
+{
+"code": "TRHMA",
+"label": "Managed Assets: Memo: Individual Retirement, Health Savings and Similar Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 81
+},
+{
+"code": "TMASMF",
+"label": "Managed Assets: Memo: Investments of Fiduciary Accounts in Advised or Sponsored Mutual Funds",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 82
+},
+{
+"code": "TPIMATOT",
+"label": "Managed Assets: Memo: Total, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 83
+},
+{
+"code": "TEMATOT",
+"label": "Managed Assets: Memo: Total, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 84
+},
+{
+"code": "TOMATOT",
+"label": "Managed Assets: Memo: Total, All Other Managed Asset Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 85
+},
+{
+"code": "TONI",
+"label": "Managed Assets: Non-Interest-Bearing Deposits- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 86
+},
+{
+"code": "TOI",
+"label": "Managed Assets: Interest-Bearing Deposits- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 87
+},
+{
+"code": "TOSCUS",
+"label": "Managed Assets: U.S. Treasury & U.S. Government Agency Obligations- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 88
+},
+{
+"code": "TOSCMUN",
+"label": "Managed Assets: State, County and Municipal Obligations- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 89
+},
+{
+"code": "TOMMF",
+"label": "Managed Assets: Money Market Mutual Funds- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 90
+},
+{
+"code": "TOEQF",
+"label": "Managed Assets: Equity Mutual Funds- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 91
+},
+{
+"code": "TOOTHF",
+"label": "Managed Assets: Other Mutual Funds- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 92
+},
+{
+"code": "TOTRF",
+"label": "Managed Assets: Common Trust Funds and Collective Investment Funds, Managed All Other Accounts",
+"cat": "Collective Investment Funds",
+"unit": "usd",
+"n": 93
+},
+{
+"code": "TOSTO",
+"label": "Managed Assets: Other Short-Term Obligations- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 94
+},
+{
+"code": "TOOTHB",
+"label": "Managed Assets: Other Notes and Bonds- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 95
+},
+{
+"code": "TOUF",
+"label": "Managed Assets: Investments in Unregistered Funds & Private Equity Investments- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 96
+},
+{
+"code": "TOCPS",
+"label": "Managed Assets: Other Common and Preferred Stocks, Managed All OtherAccounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 97
+},
+{
+"code": "TOREMTG",
+"label": "Managed Assets: Real Estate Mortgages- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 98
+},
+{
+"code": "TORE",
+"label": "Managed Assets: Real Estate, Managed All OtherAccounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 99
+},
+{
+"code": "TOMISC",
+"label": "Managed Assets: Miscellaneous Assets- All Other Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 100
+},
+{
+"code": "TENI",
+"label": "Managed Assets: Non-Interest Bearing Deposits, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 101
+},
+{
+"code": "TEI",
+"label": "Managed Assets: Interest Bearing Deposits, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 102
+},
+{
+"code": "TESCUS",
+"label": "Managed Assets: U.S. Treasury and U.S. Government Agency Obligations, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 103
+},
+{
+"code": "TESCMUN",
+"label": "Managed Assets: State, County & Municipal Obligations, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 104
+},
+{
+"code": "TEMMF",
+"label": "Managed Assets: Money Market Mutual Funds, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 105
+},
+{
+"code": "TEEQF",
+"label": "Managed Assets: Equity Mutual Funds, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 106
+},
+{
+"code": "TEOTHF",
+"label": "Managed Assets: Other Mutual Funds, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 107
+},
+{
+"code": "TETRF",
+"label": "Managed Assets: Common Trust & Collective investment Funds, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Collective Investment Funds",
+"unit": "usd",
+"n": 108
+},
+{
+"code": "TESTO",
+"label": "Managed Assets: Other Short-Term Obligations, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 109
+},
+{
+"code": "TEOTHB",
+"label": "Managed Assets: Other Notes and Bonds, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 110
+},
+{
+"code": "TEUF",
+"label": "Managed Assets: Unregistered Funds & Private Equity Investments, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 111
+},
+{
+"code": "TECPS",
+"label": "Managed Assets: Other Common & Preferred Stocks, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 112
+},
+{
+"code": "TEREMTG",
+"label": "Managed Assets: Real Estate Mortgages, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 113
+},
+{
+"code": "TERE",
+"label": "Managed Assets: Real Estate, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 114
+},
+{
+"code": "TEMISC",
+"label": "Managed Assets: Miscellaneous Assets, Managed Employee Benefit & Retirement-Related Trust & Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 115
+},
+{
+"code": "TPINI",
+"label": "Managed Assets: Non-Interest-Bearing Deposits, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 116
+},
+{
+"code": "TPII",
+"label": "Managed Assets: Interest-Bearing Deposits, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 117
+},
+{
+"code": "TPISCUS",
+"label": "Managed Assets:U.S. Treasury & U.S. Government Agency Obligations, Assets Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 118
+},
+{
+"code": "TPISCMUN",
+"label": "Managed Assets: State, County and Municipal Obligations,Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 119
+},
+{
+"code": "TPIMMF",
+"label": "Managed Assets: Money Market Mutual Funds, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 120
+},
+{
+"code": "TPIEQF",
+"label": "Managed Assets: Equity Mutual Funds, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 121
+},
+{
+"code": "TPIOTHF",
+"label": "Managed Assets: Other Mutual Funds, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 122
+},
+{
+"code": "TPITRF",
+"label": "Managed Assets: Common Trust & Collective investment Funds, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Collective Investment Funds",
+"unit": "usd",
+"n": 123
+},
+{
+"code": "TPISTO",
+"label": "Managed Assets: Other Short-Term Obligations, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 124
+},
+{
+"code": "TPIOTHB",
+"label": "Managed Assets: Other Notes and Bonds, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 125
+},
+{
+"code": "TPIUF",
+"label": "Managed Assets: Unregistered Funds & Private Equity Investments, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 126
+},
+{
+"code": "TPICPS",
+"label": "Managed Assets: Other Common and Preferred Stocks, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 127
+},
+{
+"code": "TPIREMTG",
+"label": "Managed Assets: Real Estate Mortgages, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 128
+},
+{
+"code": "TPIRE",
+"label": "Managed Assets: Real Estate, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 129
+},
+{
+"code": "TPIMISC",
+"label": "Managed Assets: Miscellaneous Assets, Managed Personal Trust & Investment Management Agency Accounts",
+"cat": "Managed Assets",
+"unit": "usd",
+"n": 130
+},
+{
+"code": "TTNANUM",
+"label": "Number of Managed Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 131
+},
+{
+"code": "TTNMNUM",
+"label": "Number of Non-Managed Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 132
+},
+{
+"code": "TPNMNUM",
+"label": "Non-Managed Accounts: Number of Personal Trust and Agency Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 133
+},
+{
+"code": "TECNMNUM",
+"label": "Non-Managed Accounts: Number of Employee Benefit-Defined Contribution Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 134
+},
+{
+"code": "TEBNMNUM",
+"label": "Non-Managed Accounts: Number of Employee Benefit-Defined Benefit Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 135
+},
+{
+"code": "TORNMNUM",
+"label": "Non-Managed Accounts: Number of Other Employee Benefit and Retirement-Related Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 136
+},
+{
+"code": "TCANMNUM",
+"label": "Non-Managed Accounts: Number of Corporate Trust and Agency Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 137
+},
+{
+"code": "TIMNMNUM",
+"label": "Number of Investment Management and Advisory Agency Accounts, Non-Managed Assets",
+"cat": "Account Counts",
+"unit": "num",
+"n": 138
+},
+{
+"code": "TFENMNUM",
+"label": "Non-Managed Accounts: Number of Foundation and Endowment Trust and Agency Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 139
+},
+{
+"code": "TOFNMNUM",
+"label": "Non-Managed Accounts: Number of Other Fiduciary Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 140
+},
+{
+"code": "TCSNMNUM",
+"label": "Non-Managed Accounts: Number of Memo: Number of Non-Managed Custody and Safekeeping Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 141
+},
+{
+"code": "TNMNUMF",
+"label": "Non-Managed Accounts: Number of Memo Number of Non-Managed Fiduciary Accounts Held in Foreign Offices",
+"cat": "Account Counts",
+"unit": "num",
+"n": 142
+},
+{
+"code": "TRHNMNUM",
+"label": "Non-Managed Accounts: Number of Memo: Number of Non-Managed Individual Retirement, Health Savings and Similar Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 143
+},
+{
+"code": "TPMANUM",
+"label": "Managed Accounts: Personal Trust and Agency, Number of Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 144
+},
+{
+"code": "TECMANUM",
+"label": "Managed Accounts: Employee Benefit-Defined Contribution, Number of Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 145
+},
+{
+"code": "TEBMANUM",
+"label": "Managed Accounts: Employee Benefit-Defined Benefit, Number of Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 146
+},
+{
+"code": "TORMANUM",
+"label": "Managed Accounts: Other Employee Benefit and Retirement-Related, Number of Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 147
+},
+{
+"code": "TCAMANUM",
+"label": "Managed Accounts: Corporate Trust and Agency, Number of Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 148
+},
+{
+"code": "TIMMANUM",
+"label": "Number of Managed Investment Management and Investment Advisory Agency Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 149
+},
+{
+"code": "TFEMANUM",
+"label": "Managed Accounts: Foundation and Endowment Trust and Agency, Number of Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 150
+},
+{
+"code": "TOFMANUM",
+"label": "Managed Accounts: Other Fiduciary Accounts, Number of Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 151
+},
+{
+"code": "TMAFNUM",
+"label": "Managed Accounts: Memo: Number of Managed Fiduciary Accounts Held in Foreign Offices",
+"cat": "Account Counts",
+"unit": "num",
+"n": 152
+},
+{
+"code": "TRHMANUM",
+"label": "Managed Accounts: Memo: Number of Managed individual Retirement, Health Savings, and Similar Accounts",
+"cat": "Account Counts",
+"unit": "num",
+"n": 153
+},
+{
+"code": "TMASMFN",
+"label": "Managed Accounts: Memo: Number of Investments of Fiduciary Accounts in Advised or Sponsored Mutual Funds",
+"cat": "Account Counts",
+"unit": "num",
+"n": 154
+}
+]
