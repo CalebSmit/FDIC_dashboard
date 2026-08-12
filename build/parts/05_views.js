@@ -127,6 +127,7 @@ function tiles(codes){
     t.addEventListener('mouseleave', tipHide);
     wrap.appendChild(t);
   });
+  evenGrid(wrap, codes.length, 150, {emphasise:true});
   return wrap;
 }
 
@@ -163,6 +164,8 @@ function openMetricDetail(code){
   modal(metricLabel(code), head, [{label:'Close', act:'__close', primary:true}], {
     wide: true,
     onMount: function(body){
+      const strip = body.querySelector('.detail-stats');
+      if(strip) evenGrid(strip, rows.length, 132);
       const t = document.createElement('div');
       t.className = 'card-head';
       t.style.marginTop = '12px';
@@ -212,6 +215,7 @@ function profileCard(){
   dl.innerHTML = items.map(i =>
     '<div><dt>'+esc(i[0])+'</dt><dd>'+(i[0]==='Website'?i[1]:esc(i[1]))+'</dd></div>').join('');
   c.appendChild(dl);
+  evenGrid(dl, items.length, 128);
   return c;
 }
 

@@ -241,3 +241,38 @@ silently ignores paths beginning with an underscore.
 
 Neither file is produced by `build.py` — they are static and do not change when
 the dashboard is rebuilt.
+
+## Even grids
+
+`auto-fit` chooses its own column count from the available width. For a fixed
+number of items that regularly lands on a count which leaves one item alone on
+the last row — six tiles in five columns is five and one, which is what the KPI
+strip did on a smaller laptop.
+
+`gridColumns()` in `04_charts.js` picks the count deliberately: the largest that
+fits the minimum item width, preferring one that divides the item count exactly,
+and never one that would leave a single orphan. `evenGrid()` applies it and
+re-applies on resize through the same observer list as the charts. Used by the
+stat tiles (150px minimum), the institution profile (128px) and the drill-in
+stat strip (132px). The CSS keeps an `auto-fit` declaration as the pre-layout
+fallback.
+
+The focused tile is still drawn double-width, but only when `evenGrid` confirms
+the whole set fits on one row — `opts.emphasise` sets a count of n+1 and an
+`emph` class. Widening one tile is otherwise exactly what pushed another onto a
+row of its own.
+
+Verified across 4,566 width/count combinations: no lone-orphan rows, and no tile
+narrower than its 150px minimum. For six tiles the ladder is 6 → 3 → 2 → 1, all
+divisors, so every row is always full.
+
+## Stacked layout
+
+Below 1080px the shell becomes a flex column with `.main` ordered before
+`.rail`, so a phone or a small laptop lands on the numbers instead of a
+screenful of controls.
+
+`min-width:0` on the rail and its children matters here: a flex item defaults to
+`min-width:auto`, which resolves to its min-content width, and a `<select>` is
+as wide as its longest option. Without it the rail was 870px inside an 820px
+viewport and the whole page scrolled sideways.

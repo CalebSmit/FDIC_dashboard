@@ -258,8 +258,18 @@ td.num,th,.profile dd,#tip .tr,.status,.hint{
 .rail-foot{flex:0 0 auto;padding:8px 10px;border-top:1px solid var(--border-strong);background:var(--surface-1)}
 .main{flex:1 1 auto;min-width:0;padding:13px 16px 44px}
 @media (max-width:1080px){
-  .shell{display:block}
-  .rail{width:auto;flex:none;position:static;height:auto;border-right:none;border-bottom:1px solid var(--border-strong)}
+  /* Stacked. The dashboard comes first so a phone or a small laptop lands on
+     the numbers instead of a screenful of controls. */
+  .shell{display:flex;flex-direction:column}
+  .main{order:1;width:100%;min-width:0}
+  /* min-width:0 matters: a flex item defaults to min-width:auto, which resolves
+     to its min-content width — and a <select> is as wide as its longest option,
+     which would push the whole rail past the screen edge. */
+  .rail{width:100%;min-width:0;flex:none;position:static;height:auto;order:2;
+    border-right:none;border-top:1px solid var(--border-strong)}
+  .rail-scroll{max-height:none;overflow:visible;min-width:0}
+  .sec,.sec-body,.picklist{min-width:0}
+  .inp,select.inp{max-width:100%}
 }
 
 /* ==========================================================================
@@ -430,7 +440,7 @@ kbd{font-family:var(--font-mono);font-size:var(--t-1);background:var(--surface-s
 /* ==========================================================================
    Stat tiles — the focused metric carries more weight than the rest
    ========================================================================== */
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(184px,100%),1fr));gap:0;
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:0;
   margin-bottom:11px;border:1px solid var(--border-strong);background:var(--border)}
 .tile{
   background:var(--surface-1);border:0;border-radius:0;
@@ -470,7 +480,10 @@ kbd{font-family:var(--font-mono);font-size:var(--t-1);background:var(--surface-s
   white-space:nowrap;overflow:hidden;
   border-top:1px solid var(--border);padding-top:4px;margin-top:5px;letter-spacing:.05em;
 }
-@media (min-width:760px){ .tiles .tile.on{grid-column:span 2} }
+/* The focused tile is drawn double-width only when evenGrid has confirmed the
+   whole set still fits on one row — widening one tile is otherwise exactly what
+   pushes another onto a row of its own. */
+.tiles.emph .tile.on{grid-column:span 2}
 
 /* No lozenge. A gain or loss is a figure in the ledger, not a badge — the
    colour and the sign carry it, and the chrome comes off. */

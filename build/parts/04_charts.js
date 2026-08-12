@@ -118,6 +118,47 @@ function mountChart(host, build){
   else requestAnimationFrame(draw);
   return host;
 }
+/* ==========================================================================
+   Even grids
+
+   `auto-fit` picks its own column count from the available width. For a fixed
+   number of items that regularly lands on a count which leaves one item alone
+   on the last row — six tiles in five columns is five and one. Choosing the
+   count deliberately, preferring one that divides the item count, keeps every
+   row full at every window size.
+   ========================================================================== */
+function gridColumns(width, count, minPx){
+  const max = Math.max(1, Math.min(count, Math.floor(width / minPx)));
+  for(let c = max; c >= 2; c--) if(count % c === 0) return c;   /* every row full */
+  for(let c = max; c >= 2; c--) if(count % c !== 1) return c;   /* no lone orphan */
+  return 1;
+}
+/* opts.emphasise: allow one item to be drawn double-width, but only when the
+   whole set still fits on a single row. Widening one item is what pushes
+   another onto a row of its own once space is tight. */
+function evenGrid(el, count, minPx, opts){
+  opts = opts || {};
+  const apply = () => {
+    const w = Math.floor(el.clientWidth);
+    if(w < 40 || !count) return;
+    let cols = gridColumns(w, count, minPx);
+    const wide = !!opts.emphasise && cols === count && w >= (count + 1) * minPx;
+    if(wide) cols = count + 1;
+    if(el._cols === cols && el._wide === wide) return;
+    el._cols = cols; el._wide = wide;
+    el.style.gridTemplateColumns = 'repeat(' + cols + ', minmax(0, 1fr))';
+    el.classList.toggle('emph', wide);
+  };
+  if(typeof ResizeObserver === 'function'){
+    const ro = new ResizeObserver(debounce(apply, 60));
+    ro.observe(el);
+    CHART_OBSERVERS.push(ro);
+  }
+  if(el.clientWidth >= 40) apply();
+  else requestAnimationFrame(apply);
+  return el;
+}
+
 /* Adds a chart to a card as a self-sizing block, and wires its download button
    to whichever SVG is current after a redraw. */
 function chartBox(cardEl, build, exportName){
