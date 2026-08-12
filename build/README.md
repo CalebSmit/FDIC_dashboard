@@ -229,3 +229,15 @@ appended to the live document — and only defers to `requestAnimationFrame` whe
 it is not, which is the case for cards assembled detached. Deferring
 unconditionally left dialog charts blank in a background tab, where frame
 callbacks are throttled to nothing.
+
+## GitHub Pages
+
+`index.html` at the repository root is a redirect to `FDIC_Peer_Dashboard.html`.
+Pages serves `index.html` at the site root, and the dashboard keeps its own
+filename so it stays recognisable when someone downloads it instead.
+
+`.nojekyll` disables Jekyll processing. Nothing here needs it, and Jekyll
+silently ignores paths beginning with an underscore.
+
+Neither file is produced by `build.py` — they are static and do not change when
+the dashboard is rebuilt.
