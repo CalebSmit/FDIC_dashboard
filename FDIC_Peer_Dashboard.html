@@ -976,7 +976,12 @@ textarea.inp{font-family:var(--font-mono);font-size:var(--t-2);resize:vertical}
     <div class="sec-body">
       <label class="fl" for="repdte">Report period</label>
       <select class="inp" id="repdte"></select>
-      <label class="check"><input type="checkbox" id="decOnly" checked> Year-end periods only</label>
+      <label class="fl" for="periodScope">Periods listed</label>
+      <select class="inp" id="periodScope">
+        <option value="recent" selected>Recent quarters, then year-ends</option>
+        <option value="all">Every quarter</option>
+        <option value="dec">Year-ends only</option>
+      </select>
       <label class="fl" for="nq">History depth</label>
       <select class="inp" id="nq">
         <option value="4">4 quarters</option>
@@ -985,7 +990,8 @@ textarea.inp{font-family:var(--font-mono);font-size:var(--t-2);resize:vertical}
         <option value="20">20 quarters</option>
       </select>
       <p class="hint">Income items are year-to-date: Q4 covers twelve months, Q2
-        covers six. The same quarter is used for every bank in the group.</p>
+        covers six. Interim quarters are marked in the list. The same quarter is
+        used for every bank in the group.</p>
     </div>
   </details>
 
@@ -1379,6 +1385,11 @@ function isYtdFlow(code){
   if(code === 'NTLNLS') return true;          /* charge-offs are a flow too */
   return !!YTD_FLOW_CATS[m.cat];
 }
+/* Months a year-to-date figure covers at a given report date: Q1 is three,
+   Q4 is twelve. Reading a Q1 income figure as an annual one is the easiest
+   mistake to make on an interim quarter. */
+const ytdMonths = d => d ? Number(d.slice(4,6)) : 12;
+const isYearEnd  = d => !!d && d.slice(4,6) === '12';
 /* True when the plotted window mixes quarters, which is when the reset shows. */
 function windowMixesQuarters(){
   const qs = {};
@@ -2211,7 +2222,13 @@ function chartRank(code, W){
       mk('rect',{x:bx, y:y+3, width:bw, height:rowH-8, rx:4, fill:color}, s);
       /* square off the baseline end so only the data end is rounded */
       if(bw > 6) mk('rect',{x:(xv>=x0?bx:bx+bw-4), y:y+3, width:4, height:rowH-8, fill:color}, s);
-      txt(s, xv + (xv>=x0?7:-7), y+rowH/2+4, fmt(r.v, unit), 'dlab', null, xv>=x0?'start':'end');
+      /* A long negative bar -- year-over-year change puts several on screen --
+         leaves no room to label its left end without printing over the name
+         column, so that label goes to the empty side of the baseline instead. */
+      const lab = fmt(r.v, unit);
+      const room = xv - CM.pad - textW(lab, 10, true) >= L;
+      txt(s, xv >= x0 ? xv + 7 : (room ? xv - 7 : x0 + 7), y+rowH/2+4, lab, 'dlab', null,
+        (xv >= x0 || !room) ? 'start' : 'end');
     }
 
     const hit = mk('rect',{x:0, y:y, width:W, height:rowH, class:'hit'}, s);
@@ -3573,6 +3590,34 @@ function render(){
       'keep them for historical context.</div>';
     d.appendChild(n);
   }
+  /* A bank that has simply not filed yet is not the same as one that has
+     stopped filing. On a just-published quarter the group can be part-reported,
+     which quietly narrows the peer statistics -- so name who is missing. */
+  const late = allCerts().filter(c => !isInactive(c) &&
+    !(S.fin[String(c)] && S.fin[String(c)][S.repdte]));
+  if(late.length){
+    const n = document.createElement('div');
+    n.className = 'notice';
+    n.innerHTML = ICO.warn + '<div><b>' + late.length + ' of ' + allCerts().length +
+      ' banks have no filing at ' + prettyDate(S.repdte) + '</b> — ' +
+      late.map(c => esc(bankName(c))).join(', ') + '. Call Reports arrive over ' +
+      'several weeks, so a newly published quarter is often incomplete. Peer ' +
+      'statistics here are computed from the ' + (allCerts().length - late.length) +
+      ' banks that did file. Use the previous quarter for a complete group.</div>';
+    d.appendChild(n);
+  }
+  /* Year-to-date figures at an interim date cover part of a year. */
+  if(!isYearEnd(S.repdte) && S.metrics.some(isYtdFlow)){
+    const n = document.createElement('div');
+    n.className = 'notice';
+    n.innerHTML = ICO.warn + '<div><b>' + prettyDate(S.repdte) + ' is an interim quarter: ' +
+      'income and expense figures cover ' + ytdMonths(S.repdte) + ' months, not twelve.</b> ' +
+      'Net income, fee income and expense lines are year-to-date and restart each ' +
+      'January, so they are not comparable with a year-end figure. Every bank in the ' +
+      'group is on the same basis, so the peer comparison holds; only the comparison ' +
+      'against a different quarter does not.</div>';
+    d.appendChild(n);
+  }
   if(S.transform === 'qoq' && S.metrics.some(isYtdFlow)){
     const n = document.createElement('div');
     n.className = 'notice';
@@ -4110,7 +4155,7 @@ async function applyConfig(cfg, quiet){
   if(cfg.repdte){
     S.repdte = cfg.repdte;
     if(!qsa('#repdte option').some(o => o.value === cfg.repdte)){
-      $('decOnly').checked = false;
+      $('periodScope').value = 'all';
       fillPeriodSelect();
     }
     $('repdte').value = cfg.repdte;
@@ -4148,20 +4193,35 @@ async function shareLink(){
 /* ==========================================================================
    Periods
    ========================================================================== */
+/* The list a bank actually works from. "Recent" carries every quarter of the
+   last two years -- so whatever the FDIC published most recently is always one
+   click away -- and year-ends only before that, where quarterly detail stops
+   being worth the scrolling. */
+function periodList(scope){
+  const P = S.periods;
+  const dec = d => d.slice(4,6) === '12';
+  if(scope === 'all') return P.slice(0, 40);
+  if(scope === 'dec') return P.filter(dec).slice(0, 20);
+  return P.slice(0, 8).concat(P.slice(8).filter(dec).slice(0, 16));
+}
+/* Q4 is the like-for-like period: income items cover a full twelve months and
+   every bank has closed its year. It stays the default even when a newer
+   interim quarter is available. */
+const latestYearEnd = list => list.filter(d => d.slice(4,6) === '12')[0] || list[0] || null;
+
 function fillPeriodSelect(){
   const sel = $('repdte');
   const keep = sel.value;
-  const decOnly = $('decOnly').checked;
-  const list = S.periods.filter(d => !decOnly || d.slice(4,6) === '12').slice(0, decOnly ? 20 : 40);
+  const list = periodList($('periodScope').value);
   sel.innerHTML = '';
   list.forEach(d => {
     const o = document.createElement('option');
     o.value = d;
-    o.textContent = qLabelLong(d) + ' — ' + prettyDate(d);
+    o.textContent = qLabelLong(d) + ' — ' + prettyDate(d) +
+      (d.slice(4,6) === '12' ? '' : ' · interim');
     sel.appendChild(o);
   });
-  if(list.indexOf(keep) >= 0) sel.value = keep;
-  else if(list.length) sel.value = list[0];
+  sel.value = list.indexOf(keep) >= 0 ? keep : (latestYearEnd(list) || '');
   S.repdte = sel.value;
 }
 async function initPeriods(){
@@ -4546,7 +4606,7 @@ function initRail(){
   });
 
   /* period */
-  $('decOnly').addEventListener('change', () => { fillPeriodSelect(); markDirty(); });
+  $('periodScope').addEventListener('change', () => { fillPeriodSelect(); markDirty(); });
   $('repdte').addEventListener('change', () => { S.repdte = $('repdte').value; markDirty(); });
   $('nq').addEventListener('change', () => { S.nq = Number($('nq').value); markDirty(); });
 

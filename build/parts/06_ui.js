@@ -308,7 +308,7 @@ async function applyConfig(cfg, quiet){
   if(cfg.repdte){
     S.repdte = cfg.repdte;
     if(!qsa('#repdte option').some(o => o.value === cfg.repdte)){
-      $('decOnly').checked = false;
+      $('periodScope').value = 'all';
       fillPeriodSelect();
     }
     $('repdte').value = cfg.repdte;
@@ -346,20 +346,35 @@ async function shareLink(){
 /* ==========================================================================
    Periods
    ========================================================================== */
+/* The list a bank actually works from. "Recent" carries every quarter of the
+   last two years -- so whatever the FDIC published most recently is always one
+   click away -- and year-ends only before that, where quarterly detail stops
+   being worth the scrolling. */
+function periodList(scope){
+  const P = S.periods;
+  const dec = d => d.slice(4,6) === '12';
+  if(scope === 'all') return P.slice(0, 40);
+  if(scope === 'dec') return P.filter(dec).slice(0, 20);
+  return P.slice(0, 8).concat(P.slice(8).filter(dec).slice(0, 16));
+}
+/* Q4 is the like-for-like period: income items cover a full twelve months and
+   every bank has closed its year. It stays the default even when a newer
+   interim quarter is available. */
+const latestYearEnd = list => list.filter(d => d.slice(4,6) === '12')[0] || list[0] || null;
+
 function fillPeriodSelect(){
   const sel = $('repdte');
   const keep = sel.value;
-  const decOnly = $('decOnly').checked;
-  const list = S.periods.filter(d => !decOnly || d.slice(4,6) === '12').slice(0, decOnly ? 20 : 40);
+  const list = periodList($('periodScope').value);
   sel.innerHTML = '';
   list.forEach(d => {
     const o = document.createElement('option');
     o.value = d;
-    o.textContent = qLabelLong(d) + ' — ' + prettyDate(d);
+    o.textContent = qLabelLong(d) + ' — ' + prettyDate(d) +
+      (d.slice(4,6) === '12' ? '' : ' · interim');
     sel.appendChild(o);
   });
-  if(list.indexOf(keep) >= 0) sel.value = keep;
-  else if(list.length) sel.value = list[0];
+  sel.value = list.indexOf(keep) >= 0 ? keep : (latestYearEnd(list) || '');
   S.repdte = sel.value;
 }
 async function initPeriods(){
@@ -744,7 +759,7 @@ function initRail(){
   });
 
   /* period */
-  $('decOnly').addEventListener('change', () => { fillPeriodSelect(); markDirty(); });
+  $('periodScope').addEventListener('change', () => { fillPeriodSelect(); markDirty(); });
   $('repdte').addEventListener('change', () => { S.repdte = $('repdte').value; markDirty(); });
   $('nq').addEventListener('change', () => { S.nq = Number($('nq').value); markDirty(); });
 

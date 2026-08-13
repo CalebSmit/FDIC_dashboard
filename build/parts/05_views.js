@@ -767,6 +767,34 @@ function render(){
       'keep them for historical context.</div>';
     d.appendChild(n);
   }
+  /* A bank that has simply not filed yet is not the same as one that has
+     stopped filing. On a just-published quarter the group can be part-reported,
+     which quietly narrows the peer statistics -- so name who is missing. */
+  const late = allCerts().filter(c => !isInactive(c) &&
+    !(S.fin[String(c)] && S.fin[String(c)][S.repdte]));
+  if(late.length){
+    const n = document.createElement('div');
+    n.className = 'notice';
+    n.innerHTML = ICO.warn + '<div><b>' + late.length + ' of ' + allCerts().length +
+      ' banks have no filing at ' + prettyDate(S.repdte) + '</b> — ' +
+      late.map(c => esc(bankName(c))).join(', ') + '. Call Reports arrive over ' +
+      'several weeks, so a newly published quarter is often incomplete. Peer ' +
+      'statistics here are computed from the ' + (allCerts().length - late.length) +
+      ' banks that did file. Use the previous quarter for a complete group.</div>';
+    d.appendChild(n);
+  }
+  /* Year-to-date figures at an interim date cover part of a year. */
+  if(!isYearEnd(S.repdte) && S.metrics.some(isYtdFlow)){
+    const n = document.createElement('div');
+    n.className = 'notice';
+    n.innerHTML = ICO.warn + '<div><b>' + prettyDate(S.repdte) + ' is an interim quarter: ' +
+      'income and expense figures cover ' + ytdMonths(S.repdte) + ' months, not twelve.</b> ' +
+      'Net income, fee income and expense lines are year-to-date and restart each ' +
+      'January, so they are not comparable with a year-end figure. Every bank in the ' +
+      'group is on the same basis, so the peer comparison holds; only the comparison ' +
+      'against a different quarter does not.</div>';
+    d.appendChild(n);
+  }
   if(S.transform === 'qoq' && S.metrics.some(isYtdFlow)){
     const n = document.createElement('div');
     n.className = 'notice';

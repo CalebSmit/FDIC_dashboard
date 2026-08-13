@@ -294,7 +294,13 @@ function chartRank(code, W){
       mk('rect',{x:bx, y:y+3, width:bw, height:rowH-8, rx:4, fill:color}, s);
       /* square off the baseline end so only the data end is rounded */
       if(bw > 6) mk('rect',{x:(xv>=x0?bx:bx+bw-4), y:y+3, width:4, height:rowH-8, fill:color}, s);
-      txt(s, xv + (xv>=x0?7:-7), y+rowH/2+4, fmt(r.v, unit), 'dlab', null, xv>=x0?'start':'end');
+      /* A long negative bar -- year-over-year change puts several on screen --
+         leaves no room to label its left end without printing over the name
+         column, so that label goes to the empty side of the baseline instead. */
+      const lab = fmt(r.v, unit);
+      const room = xv - CM.pad - textW(lab, 10, true) >= L;
+      txt(s, xv >= x0 ? xv + 7 : (room ? xv - 7 : x0 + 7), y+rowH/2+4, lab, 'dlab', null,
+        (xv >= x0 || !room) ? 'start' : 'end');
     }
 
     const hit = mk('rect',{x:0, y:y, width:W, height:rowH, class:'hit'}, s);

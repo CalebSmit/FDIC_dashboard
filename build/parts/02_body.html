@@ -241,7 +241,12 @@
     <div class="sec-body">
       <label class="fl" for="repdte">Report period</label>
       <select class="inp" id="repdte"></select>
-      <label class="check"><input type="checkbox" id="decOnly" checked> Year-end periods only</label>
+      <label class="fl" for="periodScope">Periods listed</label>
+      <select class="inp" id="periodScope">
+        <option value="recent" selected>Recent quarters, then year-ends</option>
+        <option value="all">Every quarter</option>
+        <option value="dec">Year-ends only</option>
+      </select>
       <label class="fl" for="nq">History depth</label>
       <select class="inp" id="nq">
         <option value="4">4 quarters</option>
@@ -250,7 +255,8 @@
         <option value="20">20 quarters</option>
       </select>
       <p class="hint">Income items are year-to-date: Q4 covers twelve months, Q2
-        covers six. The same quarter is used for every bank in the group.</p>
+        covers six. Interim quarters are marked in the list. The same quarter is
+        used for every bank in the group.</p>
     </div>
   </details>
 

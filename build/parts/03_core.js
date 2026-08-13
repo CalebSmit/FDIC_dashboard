@@ -170,6 +170,11 @@ function isYtdFlow(code){
   if(code === 'NTLNLS') return true;          /* charge-offs are a flow too */
   return !!YTD_FLOW_CATS[m.cat];
 }
+/* Months a year-to-date figure covers at a given report date: Q1 is three,
+   Q4 is twelve. Reading a Q1 income figure as an annual one is the easiest
+   mistake to make on an interim quarter. */
+const ytdMonths = d => d ? Number(d.slice(4,6)) : 12;
+const isYearEnd  = d => !!d && d.slice(4,6) === '12';
 /* True when the plotted window mixes quarters, which is when the reset shows. */
 function windowMixesQuarters(){
   const qs = {};

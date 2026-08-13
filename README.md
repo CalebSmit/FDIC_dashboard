@@ -37,6 +37,12 @@ stored anywhere but your browser.
 asset quality), 17 loan-composition and concentration items, and the full
 138-item trust and fiduciary set from Call Report Schedule RC-T.
 
+**Any published quarter** — the period list follows the FDIC, so the newest
+quarter appears as soon as it is published (currently Q1 2026). It opens on the
+latest year-end, because Q4 is the like-for-like period; interim quarters are
+marked as such and carry a banner explaining that income figures cover part of a
+year, plus a warning if any bank in the group has not filed yet.
+
 **Reshape the numbers** — benchmark against the peer median, average, quartiles
 or maximum; show figures as reported, as year-over-year or quarter-over-quarter
 change, as a percent of assets or of gross loans, or per employee or per office.
@@ -107,6 +113,9 @@ chart-fitting system, and the reasoning behind the data caveats below.
   covers twelve, and the count restarts each January. The dashboard flags this
   wherever it could be misread as a decline, and blocks quarter-over-quarter
   comparison on those items, which is never like-for-like.
+- **A newly published quarter can be incomplete.** Banks file over several
+  weeks. If any bank in the group has no filing at the selected date, it is named
+  and the peer statistics say how many banks they were computed from.
 - **Peer statistics exclude your own bank**, so "peer median" describes the
   comparison group rather than the group plus you.
 - **Ratios are taken as the FDIC publishes them** and are not recalculated.

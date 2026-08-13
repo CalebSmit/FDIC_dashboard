@@ -120,6 +120,42 @@ meaningful. Year-over-year is unaffected — it compares Q4 with Q4.
 Balance-sheet items are point-in-time and carry across quarters cleanly, so they
 are deliberately excluded from the warning.
 
+## Report periods
+
+`initPeriods()` asks the FDIC for the newest `REPDTE` that `DEFAULT_INSTITUTION`
+has filed and builds 80 quarters back from it, so the list follows publication
+without anyone editing a date. As of the last check the newest published quarter
+FDIC-wide is **31 March 2026** (4,352 institutions filed; 4,411 filed at
+31 December 2025).
+
+`periodList(scope)` decides what the dropdown offers:
+
+| Scope | Contents |
+|---|---|
+| `recent` (default) | Every quarter of the last two years, then year-ends for sixteen more |
+| `all` | 40 consecutive quarters |
+| `dec` | 20 year-ends |
+
+The default *selection* is deliberately not the newest period. `latestYearEnd()`
+picks the most recent December, because Q4 is the like-for-like period — income
+items cover a full twelve months and every bank has closed its year. A newer
+interim quarter is one click above it and is labelled `· interim`.
+
+Two guards apply when an interim quarter is selected:
+
+- **Partial year banner.** Income and expense figures at 31 March cover three
+  months. The peer comparison is still valid — every bank is on the same basis —
+  but the figure is not comparable with a year-end one, and the banner says which
+  of the two is true.
+- **Late-filer banner.** Call Reports arrive over several weeks, so a
+  just-published quarter is often incomplete. Any bank in the group with no
+  filing at the selected date is named, along with how many banks the peer
+  statistics were actually computed from. This is distinct from the existing
+  "no longer filing" banner, which is about merged or closed institutions.
+
+Loading a shared setup whose period is outside the current scope widens the scope
+to `all` rather than silently snapping to a different quarter.
+
 ## Verification
 
 The statistics were checked against an independent computation: nine banks,
