@@ -31,7 +31,7 @@ stored anywhere but your browser.
 | **Trends** | How have the numbers and our ranking moved, quarter by quarter? |
 | **Explore** | How do any two metrics relate across the group? |
 | **Market** | What share of county deposits do we hold, and against whom? |
-| **Compare** | The full sortable matrix — every metric, every bank. |
+| **Compare** | The full sortable matrix — every metric, every bank — with the selected row drawn as ranked bars underneath. |
 
 **200 metrics** — 45 core (balance sheet, earnings, performance ratios, capital,
 asset quality), 17 loan-composition and concentration items, and the full

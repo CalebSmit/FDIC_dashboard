@@ -59,10 +59,6 @@
   --accent-wash:rgba(11,11,11,0.045);
   --accent-wash-2:rgba(11,11,11,0.085);
 
-  /* Percentile shading in the matrix. Magnitude, not category — so it is a
-     neutral ramp and never competes with the red/green deltas beside it. */
-  --cell-shade:rgba(11,11,11,0.42);
-
   /* Solid button: navy, not blue. */
   --btn-solid:#14202e;
   --btn-solid-ink:#f4f5f3;
@@ -106,7 +102,6 @@
     --accent:#3987e5;
     --accent-wash:rgba(255,255,255,0.05);
     --accent-wash-2:rgba(255,255,255,0.10);
-    --cell-shade:rgba(255,255,255,0.34);
     --btn-solid:#dfe6ee;
     --btn-solid-ink:#0b1119;
     --bg-rule:rgba(255,255,255,0.026);
@@ -131,7 +126,6 @@
   --accent:#3987e5;
   --accent-wash:rgba(255,255,255,0.05);
   --accent-wash-2:rgba(255,255,255,0.10);
-  --cell-shade:rgba(255,255,255,0.34);
   --btn-solid:#dfe6ee;
   --btn-solid-ink:#0b1119;
   --bg-rule:rgba(255,255,255,0.026);
@@ -614,10 +608,6 @@ thead th.focuscol{background:var(--surface-sunk);color:var(--text-primary)}
 }
 .na{color:var(--muted)}
 .sortcue{color:var(--text-primary);font-size:var(--t-1);margin-left:3px}
-.bar-cell{position:relative}
-/* Magnitude as a rule under the figure, so the number is never read through a wash. */
-.bar-cell .fill{position:absolute;left:0;bottom:0;height:2px;border-radius:0}
-.bar-cell span{position:relative}
 .tbl-toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:7px}
 .tbl-toolbar .grow{flex:1 1 180px;min-width:150px}
 

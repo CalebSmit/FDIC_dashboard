@@ -227,8 +227,7 @@ function tableCard(compact){
   const c = card('Comparison matrix',
     'Every selected metric at ' + prettyDate(S.repdte) + ', shown as ' +
     TRANSFORM_LABEL[S.transform] + '. Sort by any bank\'s column, or click a metric ' +
-    'name to make it the focus of the charts. Shading gives each bank\'s standing ' +
-    'within the group for that row.');
+    'name to draw it in the chart below. Hover any figure for its standing in the group.');
 
   /* toolbar */
   const tb = document.createElement('div');
@@ -369,24 +368,17 @@ function tableCard(compact){
     certs.forEach((ct,i) => {
       const td = document.createElement('td');
       const isF = ct === String(S.focus.CERT);
-      td.className = 'num bar-cell' + (isF ? ' focuscol' : '');
+      td.className = 'num' + (isF ? ' focuscol' : '');
       const v = rowVals[i];
       if(v == null){
         td.innerHTML = '<span class="na">—</span>';
         td.title = bankName(ct) + ' did not report this item for ' + prettyDate(S.repdte);
       }else{
+        /* Figures only. Magnitude is carried by the ranked chart under the
+           table, where a bar has room to be read, rather than by a rule drawn
+           through the number itself. */
         const p = pctRank(v, present);
-        if(!isF && v !== 0 && p != null && p > 2){
-          const fill = document.createElement('span');
-          fill.className = 'fill';
-          fill.style.width = p + '%';
-          fill.style.background = cssv('--cell-shade');
-          fill.style.opacity = String(0.25 + p/100*0.65);
-          td.appendChild(fill);
-        }
-        const sp = document.createElement('span');
-        sp.textContent = fmt(v, unit);
-        td.appendChild(sp);
+        td.textContent = fmt(v, unit);
         td.title = bankName(ct) + '\n' + (m.label||code) + ': ' + fmt(v,unit) +
           (p != null ? '\n' + Math.round(p) + 'th percentile in this group' : '');
       }
@@ -708,6 +700,22 @@ function viewMarket(d){
 
 function viewCompare(d){
   d.appendChild(tableCard(false));
+
+  /* The same row of the table, drawn. Reading nine figures across a row tells
+     you the numbers; the bars tell you the shape of the gap. */
+  const c = card('Ranked comparison — ' + metricLabel(S.primary),
+    'The row highlighted above, drawn largest first. The dashed rule is the ' +
+    esc(BENCH_LABEL[S.benchmark]).toLowerCase() + '. Click any metric name in the ' +
+    'table to draw it here, or pick one on the right. Click a bar to pin that bank ' +
+    'into Trends.' + ytdNote(S.primary));
+  c._tools.appendChild(metricPicker(S.primary, v => { S.primary = v; render(); }));
+  chartBox(c, w => chartRank(S.primary, w), 'Ranked comparison — ' + metricLabel(S.primary));
+  c.appendChild(legendRow([
+    {color:FOCUS_COLOR(), label:bankName(S.focus.CERT)},
+    {color:PEER_COLOR(),  label:'Peer banks'},
+    {color:cssv('--bench-ink'), label:BENCH_LABEL[S.benchmark], type:'line'}
+  ]));
+  d.appendChild(c);
 }
 
 /* ==========================================================================
