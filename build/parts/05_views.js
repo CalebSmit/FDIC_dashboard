@@ -549,20 +549,21 @@ function viewExplore(d){
   g.appendChild(quadrantCard());
   d.appendChild(g);
 
-  const cc = card('How the metrics move together',
-    'Correlation across the ' + allCerts().length + ' banks at ' + prettyDate(S.repdte) +
-    ' — not through time. Blue means the two rise together, orange means one rises as ' +
-    'the other falls, and pale means no relationship worth reading. <b>Click any cell to ' +
-    'plot that pair above.</b>' +
-    (S.metrics.length > 12 ? ' Showing the first 12 of ' + S.metrics.length + ' metrics.' : ''));
-  chartBox(cc, w => chartCorrelation(S.metrics.slice(0,12), w, (x,y) => {
-    S.scatterX = x; S.scatterY = y; render();
-  }), 'Correlation matrix');
+  const cc = card('What moves with ' + metricLabel(S.scatterY),
+    'Every other selected metric ranked by how closely it tracks ' +
+    esc(metricLabel(S.scatterY)) + ' across the ' + allCerts().length + ' banks at ' +
+    prettyDate(S.repdte) + ' — a relationship between metrics, not a trend through time. ' +
+    'Right means the two rise together, left means one rises as the other falls, and ' +
+    'anything inside ±0.3 is faded because it is not worth reading. <b>Click a bar to put ' +
+    'that metric on the horizontal axis above.</b>');
+  cc._tools.appendChild(metricPicker(S.scatterY, v => { S.scatterY = v; render(); }));
+  chartBox(cc, w => chartDrivers(S.scatterY, S.metrics, w, code => {
+    S.scatterX = code; render();
+  }), 'What moves with ' + metricLabel(S.scatterY));
   cc.appendChild(legendRow([
-    {color:cssv('--series-1'), label:'Move together'},
-    {color:cssv('--series-2'), label:'Move opposite'},
-    {type:'note', label:'colour strength is how consistent the relationship is'},
-    {type:'note', label:'blank cells: fewer than four banks report both'}
+    {color:cssv('--series-1'), label:'Rise together'},
+    {color:cssv('--series-2'), label:'One rises, one falls'},
+    {type:'note', label:'a relationship here is not evidence that one causes the other'}
   ]));
   d.appendChild(cc);
 }

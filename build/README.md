@@ -175,11 +175,20 @@ What replaced them:
   values and which side of each median it falls on. The scatter labels only the
   focus bank, because labelling nine points makes it unreadable; this is where
   the names live.
-- **Explore → "How the metrics move together"**, a correlation matrix across the
-  banks at the selected period. The scatter answers one pair; the matrix says
-  which pairs are worth plotting. Clicking a cell loads that pair into the
-  scatter above. Checked against an independent Pearson computation: 144
-  correlations, agreement to 1e-12, matrix symmetric.
+- **Explore → "What moves with …"**, every other selected metric ranked by how
+  closely it tracks the plotted one, as diverging bars on a fixed −1…+1 axis.
+  Anything inside ±0.3 is faded, because a weak correlation given equal visual
+  weight to a strong one is worse than not drawing it. Clicking a bar puts that
+  metric on the horizontal axis of the scatter above; the header picker
+  retargets the whole panel. Correlation comes from `corrOf()`, checked against
+  an independent Pearson computation — 132 pairs, agreement to 1e-12 — and the
+  drawn bar order was checked against the expected |r| sort.
+
+  This started as a full N×N correlation matrix. It was replaced because it made
+  two grid visuals in one dashboard, and because a reader only ever asks the
+  question about one metric at a time — anchoring on the plotted metric answers
+  the same thing without a colour key. **One grid visual is a deliberate cap**;
+  the heatmap below is it.
 - **Compare → "Standing at a glance"**, the whole matrix as a heatmap. A ranking
   chart there repeated the Overview panel exactly; this visualises all 12 rows
   instead of one. Shading is **direction-aware** — `betterDir()` inverts the ramp

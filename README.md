@@ -29,12 +29,13 @@ stored anywhere but your browser.
 |---|---|
 | **Overview** | Where do we stand right now? Rank, the trend against the peer range, position across every selected metric. |
 | **Trends** | How have the numbers and our ranking moved, quarter by quarter, against named competitors? |
-| **Explore** | How do metrics relate to each other? Scatter any pair, see who sits where, and read the correlation matrix. |
+| **Explore** | How do metrics relate to each other? Scatter any pair, see who sits where, and rank what moves with the metric you are looking at. |
 | **Market** | What share of county deposits do we hold, and against whom? |
 | **Compare** | The full sortable matrix — every metric, every bank — with the same figures shaded by standing underneath. |
 
-No chart appears on two views: each page answers a different question rather than
-restating the last one.
+No chart appears on two views, and only one panel in the whole dashboard is a
+shaded grid: each page answers a different question rather than restating the
+last one in a different colour.
 
 **200 metrics** — 45 core (balance sheet, earnings, performance ratios, capital,
 asset quality), 17 loan-composition and concentration items, and the full

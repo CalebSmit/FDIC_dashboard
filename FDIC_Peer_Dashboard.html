@@ -2778,68 +2778,77 @@ function corrOf(a, b){
   }
   return (sxx && syy) ? sxy/Math.sqrt(sxx*syy) : null;
 }
-function chartCorrelation(codes, W, onPick){
+/* One metric against all the others, as bars rather than a grid.
+
+   A full N x N matrix is a lot of screen for a reader who only ever asks one
+   question at a time -- "what moves with the thing I am looking at" -- and it
+   asks them to decode a colour scale to answer it. Anchoring on the plotted
+   metric and ranking the rest by strength answers the same question in a form
+   that needs no key, and leaves the dashboard with a single grid visual. */
+function chartDrivers(target, codes, W, onPick){
   W = W || 640;
-  const n = codes.length;
-  const labs = codes.map(metricLabel);
-  /* The row-label column takes what it needs, capped so the cells stay square
-     enough to read; the cell size then follows from what is left. */
-  const L = clampN(Math.ceil(maxTextW(labs, 10, false)) + CM.pad, 90, Math.round(W*0.34));
-  const T = 34, B = 6, R = CM.right;
-  /* Cells stay square and stay modest: a correlation matrix stretched to fill a
-     1200px panel would be a wall of enormous squares. The block is centred
-     instead, labels and all, so the leftover width reads as margin rather than
-     as an empty half-panel. */
-  const cell = Math.max(14, Math.min(46, Math.floor((W - L - R) / n)));
-  const gridW = cell * n;
-  const G = L + Math.max(0, Math.floor((W - L - R - gridW) / 2));
-  const H = T + cell*n + B;
-  const s = svgEl(W, H, 'Correlation between selected metrics');
-  if(n < 2){ txt(s, W/2, H/2, 'Select at least two metrics', 'tick', null, 'middle'); return s; }
+  const others = codes.filter(c => c !== target);
+  const rows = others
+    .map(c => ({code:c, name:metricLabel(c), r:corrOf(target, c)}))
+    .filter(x => x.r != null)
+    .sort((a,b) => Math.abs(b.r) - Math.abs(a.r))
+    .slice(0, 14);
 
-  const rowLab = labs.map(l => ellipsize(l, L - CM.pad, 10, false));
-  /* Column headers are the field codes: a rotated full name column would cost
-     more height than the matrix itself and still not be readable. */
-  codes.forEach((c,j) => {
-    const t = txt(s, 0, 0, c, 'tick', null, 'start');
-    t.setAttribute('transform', 'translate(' + (G + j*cell + cell/2 + 3) + ',' + (T-6) + ') rotate(-90)');
-  });
-
-  for(let i=0; i<n; i++){
-    txt(s, G-CM.pad, T + i*cell + cell/2 + 3.5, rowLab[i], 'barlab',
-      'fill:'+cssv('--text-secondary'), 'end');
-    for(let j=0; j<n; j++){
-      const x = G + j*cell, y = T + i*cell;
-      const r = i === j ? 1 : corrOf(codes[i], codes[j]);
-      if(r == null){
-        mk('rect',{x:x, y:y, width:cell-1, height:cell-1, fill:cssv('--surface-sunk')}, s);
-        continue;
-      }
-      /* Diverging on sign, saturation on strength. Two hues from the existing
-         series palette rather than a new ramp. */
-      mk('rect',{x:x, y:y, width:cell-1, height:cell-1,
-        fill: r >= 0 ? cssv('--series-1') : cssv('--series-2'),
-        'fill-opacity': (0.10 + Math.abs(r)*0.80).toFixed(3)}, s);
-      if(cell >= 26 && i !== j)
-        txt(s, x + cell/2, y + cell/2 + 3.5, (Math.abs(r) >= 0.995 ? '1' : r.toFixed(2).replace(/^0\./,'.').replace(/^-0\./,'-.')),
-          'dlab', 'fill:'+(Math.abs(r) > 0.62 ? cssv('--surface-1') : cssv('--text-primary'))+';font-size:9px', 'middle');
-
-      const hit = mk('rect',{x:x, y:y, width:cell-1, height:cell-1, class:'hit'}, s);
-      hit.addEventListener('mousemove', ev => tipShow(
-        '<div class="tt">'+esc(labs[i])+'<br>vs '+esc(labs[j])+'</div>' +
-        (i === j ? '<div class="tr"><span>Same metric</span><span>—</span></div>'
-                 : '<div class="tr"><span>Correlation</span><span>'+r.toFixed(2)+'</span></div>' +
-                   '<div class="tr"><span>Direction</span><span>'+
-                     (Math.abs(r) < 0.3 ? 'little or none' :
-                      r > 0 ? 'move together' : 'move opposite')+'</span></div>' +
-                   '<div class="tfoot">Click to plot this pair</div>'), ev));
-      hit.addEventListener('mouseleave', tipHide);
-      if(i !== j && onPick)
-        hit.addEventListener('click', () => { tipHide(); onPick(codes[j], codes[i]); });
-    }
+  const rowH = CM.rowH, padT = CM.top + 6, padB = CM.bottom - 4;
+  const rawNames = rows.map(x => x.name);
+  const L = clampN(Math.ceil(maxTextW(rawNames, 10.5, false)) + CM.pad, 100, Math.round(W*0.42));
+  const names = rawNames.map(n => ellipsize(n, L - CM.pad, 10.5, false));
+  const R = clampN(Math.ceil(maxTextW(['-0.00'], 10, true)) + CM.pad + 6, 46, 90);
+  const H = padT + Math.max(1, rows.length)*rowH + padB;
+  const s = svgEl(W, H, 'What moves with ' + metricLabel(target));
+  if(!rows.length){
+    /* Two different reasons for an empty panel, and telling a reader the wrong
+       one sends them looking for a data problem that is not there. */
+    txt(s, W/2, H/2, others.length
+      ? 'Fewer than four banks report both metrics'
+      : 'Select a second metric to compare this one against', 'tick', null, 'middle');
+    return s;
   }
-  mk('rect',{x:G, y:T, width:gridW-1, height:cell*n-1, fill:'none',
-    stroke:cssv('--border-strong')}, s);
+
+  /* Fixed -1..+1 domain: correlation has natural bounds, and holding the scale
+     still is what lets one panel be compared with the next. */
+  const xOf = v => L + (v + 1)/2*(W - L - R);
+  const x0 = xOf(0);
+  for(const t of [-1,-0.5,0,0.5,1]){
+    mk('line',{x1:xOf(t), x2:xOf(t), y1:padT-6, y2:H-padB, class:'gridline'}, s);
+    txt(s, xOf(t), H-padB+13, t === 0 ? '0' : (t > 0 ? '+' : '') + t, 'tick', null, 'middle');
+  }
+  txt(s, xOf(-0.5), padT-12, 'moves opposite', 'tick', 'fill:'+cssv('--muted'), 'middle');
+  txt(s, xOf(0.5),  padT-12, 'moves together', 'tick', 'fill:'+cssv('--muted'), 'middle');
+  mk('line',{x1:x0, x2:x0, y1:padT-6, y2:H-padB, class:'axisline'}, s);
+
+  rows.forEach((row,i) => {
+    const y = padT + i*rowH;
+    /* Below about 0.3 the relationship is not worth reading, so it is drawn
+       recessive rather than given the same weight as a real one. */
+    const weak = Math.abs(row.r) < 0.3;
+    const color = row.r >= 0 ? cssv('--series-1') : cssv('--series-2');
+    txt(s, L-CM.pad, y+rowH/2+4, names[i], 'barlab',
+      'cursor:pointer;fill:'+(weak ? cssv('--muted') : cssv('--text-secondary')), 'end');
+
+    const xv = xOf(row.r);
+    const bx = Math.min(x0, xv), bw = Math.max(1.5, Math.abs(xv - x0));
+    mk('rect',{x:bx, y:y+3, width:bw, height:rowH-8, rx:4, fill:color,
+      'fill-opacity': weak ? .32 : 1}, s);
+    if(bw > 6) mk('rect',{x:(xv>=x0?bx:bx+bw-4), y:y+3, width:4, height:rowH-8,
+      fill:color, 'fill-opacity': weak ? .32 : 1}, s);
+    txt(s, xv + (xv>=x0?7:-7), y+rowH/2+4, row.r.toFixed(2), 'dlab', null, xv>=x0?'start':'end');
+
+    const hit = mk('rect',{x:0, y:y, width:W, height:rowH, class:'hit'}, s);
+    hit.addEventListener('mousemove', ev => tipShow(
+      '<div class="tt">'+esc(row.name)+'</div>' +
+      '<div class="tr"><span>vs '+esc(metricLabel(target))+'</span><span>'+row.r.toFixed(2)+'</span></div>' +
+      '<div class="tr"><span>Reading</span><span>'+
+        (weak ? 'little or none' : row.r > 0 ? 'rise together' : 'one rises, one falls')+'</span></div>' +
+      '<div class="tfoot">Click to plot it on the horizontal axis</div>', ev));
+    hit.addEventListener('mouseleave', tipHide);
+    hit.addEventListener('click', () => { tipHide(); if(onPick) onPick(row.code); });
+  });
   return s;
 }
 
@@ -3620,20 +3629,21 @@ function viewExplore(d){
   g.appendChild(quadrantCard());
   d.appendChild(g);
 
-  const cc = card('How the metrics move together',
-    'Correlation across the ' + allCerts().length + ' banks at ' + prettyDate(S.repdte) +
-    ' — not through time. Blue means the two rise together, orange means one rises as ' +
-    'the other falls, and pale means no relationship worth reading. <b>Click any cell to ' +
-    'plot that pair above.</b>' +
-    (S.metrics.length > 12 ? ' Showing the first 12 of ' + S.metrics.length + ' metrics.' : ''));
-  chartBox(cc, w => chartCorrelation(S.metrics.slice(0,12), w, (x,y) => {
-    S.scatterX = x; S.scatterY = y; render();
-  }), 'Correlation matrix');
+  const cc = card('What moves with ' + metricLabel(S.scatterY),
+    'Every other selected metric ranked by how closely it tracks ' +
+    esc(metricLabel(S.scatterY)) + ' across the ' + allCerts().length + ' banks at ' +
+    prettyDate(S.repdte) + ' — a relationship between metrics, not a trend through time. ' +
+    'Right means the two rise together, left means one rises as the other falls, and ' +
+    'anything inside ±0.3 is faded because it is not worth reading. <b>Click a bar to put ' +
+    'that metric on the horizontal axis above.</b>');
+  cc._tools.appendChild(metricPicker(S.scatterY, v => { S.scatterY = v; render(); }));
+  chartBox(cc, w => chartDrivers(S.scatterY, S.metrics, w, code => {
+    S.scatterX = code; render();
+  }), 'What moves with ' + metricLabel(S.scatterY));
   cc.appendChild(legendRow([
-    {color:cssv('--series-1'), label:'Move together'},
-    {color:cssv('--series-2'), label:'Move opposite'},
-    {type:'note', label:'colour strength is how consistent the relationship is'},
-    {type:'note', label:'blank cells: fewer than four banks report both'}
+    {color:cssv('--series-1'), label:'Rise together'},
+    {color:cssv('--series-2'), label:'One rises, one falls'},
+    {type:'note', label:'a relationship here is not evidence that one causes the other'}
   ]));
   d.appendChild(cc);
 }
