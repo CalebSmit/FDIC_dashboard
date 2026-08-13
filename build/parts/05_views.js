@@ -227,7 +227,8 @@ function tableCard(compact){
   const c = card('Comparison matrix',
     'Every selected metric at ' + prettyDate(S.repdte) + ', shown as ' +
     TRANSFORM_LABEL[S.transform] + '. Sort by any bank\'s column, or click a metric ' +
-    'name to draw it in the chart below. Hover any figure for its standing in the group.');
+    'name to make it the focus metric. Hover any figure for its standing in the ' +
+    'group, or read the shaded version of this same table below.');
 
   /* toolbar */
   const tb = document.createElement('div');
@@ -423,11 +424,22 @@ function viewOverview(d){
   ]));
   g.appendChild(c1);
 
-  const c2 = card('Trend',
+  /* Same chart type as the Trends view, deliberately a different question: the
+     shaded band is where the middle half of the group sat each quarter, so this
+     reads "inside the pack or outside it". Trends draws named competitors. */
+  const c2 = card('Trend against the peer range',
     S.activePeriods.length + ' quarters through ' + prettyDate(S.repdte) +
-    ', against ' + esc(BENCH_LABEL[S.benchmark]).toLowerCase() + '.' + ytdNote(S.primary));
+    '. The band is the middle half of the peer group each quarter; the dashed line is ' +
+    esc(BENCH_LABEL[S.benchmark]).toLowerCase() + '. Named competitors are on the Trends view.' +
+    ytdNote(S.primary));
   c2._tools.appendChild(metricPicker(S.primary, v => { S.primary = v; render(); }));
-  chartBox(c2, w => chartTrend(S.primary, w), 'Trend — ' + metricLabel(S.primary));
+  chartBox(c2, w => chartTrend(S.primary, w, {band:true}),
+    'Trend against peer range — ' + metricLabel(S.primary));
+  c2.appendChild(legendRow([
+    {color:FOCUS_COLOR(), label:bankName(S.focus.CERT)},
+    {color:cssv('--bench-ink'), label:BENCH_LABEL[S.benchmark], type:'line'},
+    {color:PEER_COLOR(), label:'Middle half of peers', opacity:'.20'}
+  ]));
   g.appendChild(c2);
   d.appendChild(g);
 
@@ -531,17 +543,84 @@ function viewExplore(d){
   ]));
   g.appendChild(c1);
 
-  const c2 = card('Peer ranking', 'Ranking on the vertical-axis metric.');
-  c2._tools.appendChild(metricPicker(S.scatterY, v => { S.scatterY = v; render(); }));
-  chartBox(c2, w => chartRank(S.scatterY, w), 'Peer ranking — ' + metricLabel(S.scatterY));
-  g.appendChild(c2);
+  /* The scatter labels the focus bank only, because labelling every point makes
+     it unreadable. This names them instead, and says which side of each median
+     a bank falls on -- the thing the eye is trying to work out from the plot. */
+  g.appendChild(quadrantCard());
   d.appendChild(g);
 
-  const c3 = card('Peer position across metrics',
-    'Standing on every selected metric at ' + prettyDate(S.repdte) + '.' +
-    (S.metrics.length > 20 ? ' Showing the first 20 of ' + S.metrics.length + '.' : ''));
-  chartBox(c3, w => chartPosition(S.metrics.slice(0,20), w), 'Peer position');
-  d.appendChild(c3);
+  const cc = card('How the metrics move together',
+    'Correlation across the ' + allCerts().length + ' banks at ' + prettyDate(S.repdte) +
+    ' — not through time. Blue means the two rise together, orange means one rises as ' +
+    'the other falls, and pale means no relationship worth reading. <b>Click any cell to ' +
+    'plot that pair above.</b>' +
+    (S.metrics.length > 12 ? ' Showing the first 12 of ' + S.metrics.length + ' metrics.' : ''));
+  chartBox(cc, w => chartCorrelation(S.metrics.slice(0,12), w, (x,y) => {
+    S.scatterX = x; S.scatterY = y; render();
+  }), 'Correlation matrix');
+  cc.appendChild(legendRow([
+    {color:cssv('--series-1'), label:'Move together'},
+    {color:cssv('--series-2'), label:'Move opposite'},
+    {type:'note', label:'colour strength is how consistent the relationship is'},
+    {type:'note', label:'blank cells: fewer than four banks report both'}
+  ]));
+  d.appendChild(cc);
+}
+
+/* Companion to the scatter: every bank named, both values, and the quadrant it
+   sits in relative to the two medians. */
+function quadrantCard(){
+  const ux = unitOf(S.scatterX), uy = unitOf(S.scatterY);
+  const rows = allCerts().map(c => ({
+    cert:c, name:bankName(c), x:val(c, S.scatterX), y:val(c, S.scatterY),
+    focus: c === String(S.focus.CERT)
+  })).filter(r => r.x != null && r.y != null);
+  const mx = median(rows.map(r => r.x)), my = median(rows.map(r => r.y));
+  const c = card('Who sits where',
+    'Each bank on the two plotted metrics, split at the group median of each (' +
+    esc(metricLabel(S.scatterX)) + ' ' + fmt(mx, ux) + ', ' +
+    esc(metricLabel(S.scatterY)) + ' ' + fmt(my, uy) + '). Click a row to pin that bank into Trends.');
+  const wrap = document.createElement('div');
+  wrap.className = 'tablewrap';
+  wrap.style.maxHeight = '340px';
+  const t = document.createElement('table');
+  t.innerHTML = '<thead><tr><th class="mcol">Bank</th><th>' + esc(shortLabel(S.scatterX)) +
+    '</th><th>' + esc(shortLabel(S.scatterY)) + '</th><th>Quadrant</th></tr></thead>';
+  const tb = document.createElement('tbody');
+  if(!rows.length){
+    tb.innerHTML = '<tr><td class="mcol" colspan="4" style="color:var(--muted)">' +
+      'No bank reports both metrics at this period.</td></tr>';
+  }
+  rows.sort((a,b) => b.y - a.y).forEach(r => {
+    const hi = (v, m) => v >= m ? 'high' : 'low';
+    const tr = document.createElement('tr');
+    if(r.focus) tr.className = 'on';
+    const pinned = S.pinned.indexOf(r.cert) >= 0;
+    tr.innerHTML =
+      '<td class="mcol">' + (r.focus ? '▸ ' : '') + esc(r.name) +
+        (pinned ? ' <span class="code">pinned</span>' : '') + '</td>' +
+      '<td class="num">' + fmt(r.x, ux) + '</td>' +
+      '<td class="num">' + fmt(r.y, uy) + '</td>' +
+      '<td class="num"><span class="code">' + hi(r.x, mx) + ' / ' + hi(r.y, my) + '</span></td>';
+    tr.title = r.focus ? 'This is your institution' : 'Click to pin into Trends';
+    if(!r.focus) tr.style.cursor = 'pointer';
+    tr.addEventListener('click', () => {
+      if(r.focus) return;
+      S.pinned = pinned ? S.pinned.filter(x => x !== r.cert) : S.pinned.concat(r.cert).slice(-4);
+      render();
+    });
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+  wrap.appendChild(t);
+  c.appendChild(wrap);
+  return c;
+}
+/* Column headings need to fit a quarter-width table, so the field code carries
+   the identity and the full name stays in the caption. */
+function shortLabel(code){
+  const l = metricLabel(code);
+  return l.length > 22 ? code : l;
 }
 
 function viewMarket(d){
@@ -713,19 +792,25 @@ function viewMarket(d){
 function viewCompare(d){
   d.appendChild(tableCard(false));
 
-  /* The same row of the table, drawn. Reading nine figures across a row tells
-     you the numbers; the bars tell you the shape of the gap. */
-  const c = card('Ranked comparison — ' + metricLabel(S.primary),
-    'The row highlighted above, drawn largest first. The dashed rule is the ' +
-    esc(BENCH_LABEL[S.benchmark]).toLowerCase() + '. Click any metric name in the ' +
-    'table to draw it here, or pick one on the right. Click a bar to pin that bank ' +
-    'into Trends.' + ytdNote(S.primary));
-  c._tools.appendChild(metricPicker(S.primary, v => { S.primary = v; render(); }));
-  chartBox(c, w => chartRank(S.primary, w), 'Ranked comparison — ' + metricLabel(S.primary));
+  /* The whole table as one picture rather than one row of it drawn as bars.
+     A ranking chart here would repeat the Overview panel exactly; this answers
+     the question the matrix is actually for — who is strong across the board. */
+  const cols = S.metrics.slice(0, 16);
+  const c = card('Standing at a glance',
+    'The same figures shaded by where each bank stands in its row: darker is a ' +
+    'stronger standing, not a bigger number. Ratios where a low figure is the ' +
+    'good one are marked <b>▾</b> and shaded the other way round, so dark always ' +
+    'means better. Your bank is the outlined column. Click a metric name to make ' +
+    'it the focus.' +
+    (S.metrics.length > 16 ? ' Showing the first 16 of ' + S.metrics.length + ' metrics.' : ''));
+  chartBox(c, w => chartHeatmap(cols, w, code => { S.primary = code; render(); }),
+    'Standing heatmap');
   c.appendChild(legendRow([
-    {color:FOCUS_COLOR(), label:bankName(S.focus.CERT)},
-    {color:PEER_COLOR(),  label:'Peer banks'},
-    {color:cssv('--bench-ink'), label:BENCH_LABEL[S.benchmark], type:'line'}
+    {color:cssv('--seq-100'), label:'Bottom of the group'},
+    {color:cssv('--seq-400'), label:'Middle'},
+    {color:cssv('--seq-700'), label:'Top of the group'},
+    {type:'note', label:'▾ marks a ratio where lower is better'},
+    {type:'note', label:'grey cells: not reported at this period'}
   ]));
   d.appendChild(c);
 }

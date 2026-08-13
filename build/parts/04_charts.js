@@ -346,12 +346,22 @@ function chartTrend(code, W, opts){
     pts:P.map(d => val(ct, code, d))
   }));
 
+  /* Optional quartile band: where the middle half of the peer group sat each
+     quarter. It answers a different question from a pinned-competitor line --
+     "are we inside the pack or outside it" rather than "how do we compare with
+     that bank" -- which is what separates the Overview panel from the Trends one. */
+  const band = opts.band
+    ? P.map(d => { const st = stat(code, d); return {lo:st.q1, hi:st.q3}; })
+    : null;
+
   /* Height follows the width so a full-bleed panel does not end up a thin
      letterbox, and a narrow one does not end up a tall stripe. */
   const H = opts.h || clampN(Math.round(W*0.40), 232, 330);
   const T = CM.top, B = CM.bottom;
-  const s = svgEl(W,H,'Trend of '+metricTitle(code));
-  const flat = series.reduce((a,x) => a.concat(x.pts), []).filter(v => v != null);
+  const s = svgEl(W,H, (band ? 'Trend against the peer range of ' : 'Trend of ') + metricTitle(code));
+  const flat = series.reduce((a,x) => a.concat(x.pts), [])
+    .concat(band ? band.reduce((a,b) => a.concat([b.lo, b.hi]), []) : [])
+    .filter(v => v != null);
   if(!flat.length){ txt(s, W/2, H/2, 'No values reported over this period', 'tick', null, 'middle'); return s; }
   /* Reserve the end-label column from the longest series name, then trim the
      names to whatever that column ends up being on a narrow panel. */
@@ -383,6 +393,19 @@ function chartTrend(code, W, opts){
     if(i % step && i !== P.length-1) return;
     txt(s, xOf(i), H-B+15, qLabel(d), 'tick', null, 'middle');
   });
+
+  /* Drawn before the lines so the series sit on top of it. */
+  if(band){
+    const top = [], bot = [];
+    band.forEach((b,i) => {
+      if(b.lo == null || b.hi == null) return;
+      top.push(xOf(i).toFixed(1) + ' ' + yOf(b.hi).toFixed(1));
+      bot.unshift(xOf(i).toFixed(1) + ' ' + yOf(b.lo).toFixed(1));
+    });
+    if(top.length > 1)
+      mk('path',{d:'M ' + top.concat(bot).join(' L ') + ' Z', fill:PEER_COLOR(),
+        'fill-opacity':.20, stroke:'none'}, s);
+  }
 
   const ends = [];
   for(const ser of series){
@@ -418,6 +441,9 @@ function chartTrend(code, W, opts){
       let rows = '';
       for(const ser of series)
         rows += '<div class="tr">'+tipKey(ser.color, ser.name)+'<span>'+fmt(ser.pts[i],unit)+'</span></div>';
+      if(band && band[i] && band[i].lo != null)
+        rows += '<div class="tr">'+tipKey(PEER_COLOR(), 'Middle half of peers')+
+          '<span>'+fmt(band[i].lo,unit)+' – '+fmt(band[i].hi,unit)+'</span></div>';
       tipShow('<div class="tt">'+qLabelLong(d)+' · '+prettyDate(d)+'</div>'+rows, ev);
     });
     hit.addEventListener('mouseleave', () => { cross.setAttribute('opacity','0'); tipHide(); });
@@ -664,6 +690,182 @@ function chartBump(code, W){
     });
     hit.addEventListener('mouseleave', tipHide);
   });
+  return s;
+}
+
+/* ==========================================================================
+   Standing heatmap — the whole comparison matrix as one picture
+
+   The table beside it holds 12 metrics across 9 banks: correct, complete, and
+   impossible to scan. This shades every cell by where that bank stands in its
+   row, so "who is strong across the board" is a glance instead of a read.
+
+   The ramp is direction-aware. On efficiency ratio a low number is the good
+   one, so shading by raw percentile would paint the best performer palest.
+   Every cell is shaded by standing, not by size.
+   ========================================================================== */
+const SEQ_VARS = ['--seq-100','--seq-250','--seq-400','--seq-550','--seq-700'];
+function chartHeatmap(codes, W, onPickMetric){
+  W = W || 900;
+  const certs = allCerts();
+  const n = codes.length, m = certs.length;
+  const labs = codes.map(metricLabel);
+  const names = certs.map(c => shortName(c, 22));
+
+  const L = clampN(Math.ceil(maxTextW(labs, 10, false)) + CM.pad, 110, Math.round(W*0.34));
+  const R = CM.right;
+  const T = clampN(Math.ceil(maxTextW(names, 10, false)) + 10, 60, 150);
+  /* Capped so cells stay tile-shaped. Left to fill a 1200px panel, nine banks
+     would each get a 130x22 stripe, which reads as a bar chart with no bars. */
+  const rowH = 26, B = 6;
+  const cellW = clampN(Math.floor((W - L - R) / m), 18, 72);
+  const gridW = cellW * m;
+  const G = L + Math.max(0, Math.floor((W - L - R - gridW) / 2));
+  const H = T + n*rowH + B;
+  const s = svgEl(W, H, 'Standing of every bank on every selected metric');
+  if(!n || !m){ txt(s, W/2, H/2, 'Nothing selected', 'tick', null, 'middle'); return s; }
+
+  certs.forEach((c,j) => {
+    const isF = c === String(S.focus.CERT);
+    const t = txt(s, 0, 0, ellipsize(names[j], T - 12, 10, false), 'barlab',
+      'fill:'+(isF ? cssv('--text-primary') : cssv('--text-secondary'))+
+      ';font-weight:'+(isF ? '650' : '400'), 'start');
+    t.setAttribute('transform',
+      'translate(' + (G + j*cellW + cellW/2 + 3.5) + ',' + (T-8) + ') rotate(-90)');
+  });
+
+  codes.forEach((code,i) => {
+    const unit = unitOf(code);
+    const dir = betterDir(code);
+    const y = T + i*rowH;
+    const isP = code === S.primary;
+    const lab = txt(s, G-CM.pad, y + rowH/2 + 3.5,
+      ellipsize(labs[i] + (dir < 0 ? ' ▾' : ''), L - CM.pad, 10, false), 'barlab',
+      'cursor:pointer;font-weight:'+(isP?'650':'400')+
+      ';fill:'+(isP?cssv('--accent'):cssv('--text-secondary')), 'end');
+    lab.addEventListener('click', () => { if(onPickMetric) onPickMetric(code); });
+
+    const vals = certs.map(c => val(c, code));
+    const present = vals.filter(v => v != null);
+    certs.forEach((c,j) => {
+      const x = G + j*cellW, v = vals[j];
+      if(v == null){
+        mk('rect',{x:x, y:y, width:cellW-1, height:rowH-1, fill:cssv('--surface-sunk')}, s);
+        txt(s, x + cellW/2, y + rowH/2 + 3.5, '—', 'tick', null, 'middle');
+        return;
+      }
+      const p = present.length > 1 ? pctRank(v, present) : 50;
+      /* Standing, not magnitude: flipped where a lower number is the better one. */
+      const good = dir < 0 ? 100 - p : p;
+      const step = SEQ_VARS[Math.min(SEQ_VARS.length-1, Math.floor(good/100 * SEQ_VARS.length))];
+      mk('rect',{x:x, y:y, width:cellW-1, height:rowH-1, fill:cssv(step)}, s);
+
+      const hit = mk('rect',{x:x, y:y, width:cellW-1, height:rowH-1, class:'hit'}, s);
+      hit.addEventListener('mousemove', ev => tipShow(
+        '<div class="tt">'+esc(bankName(c))+'</div>' +
+        '<div class="tr"><span>'+esc(labs[i])+'</span><span>'+fmt(v,unit)+'</span></div>' +
+        '<div class="tr"><span>Standing in group</span><span>'+Math.round(good)+' of 100</span></div>' +
+        (dir < 0 ? '<div class="tfoot">Lower is better for this ratio, so the shading is inverted</div>'
+                 : '<div class="tfoot">Click the metric name to focus it</div>'), ev));
+      hit.addEventListener('mouseleave', tipHide);
+    });
+  });
+
+  /* The focus bank's column, outlined rather than recoloured so the ramp stays
+     the only thing carrying value. */
+  const fj = certs.indexOf(String(S.focus.CERT));
+  if(fj >= 0)
+    mk('rect',{x:G + fj*cellW - 1, y:T - 3, width:cellW+1, height:n*rowH+4,
+      fill:'none', stroke:cssv('--series-1'), 'stroke-width':2}, s);
+  return s;
+}
+
+/* ==========================================================================
+   Correlation matrix — which metrics move together across the group
+
+   The scatter answers one pair at a time. This says which pairs are worth
+   plotting at all, so choosing the axes stops being guesswork. Correlation is
+   measured across the banks at the selected period, not through time.
+   ========================================================================== */
+function corrOf(a, b){
+  const xs = [], ys = [];
+  for(const c of allCerts()){
+    const x = val(c, a), y = val(c, b);
+    if(x == null || y == null) continue;
+    xs.push(x); ys.push(y);
+  }
+  if(xs.length < 4) return null;              /* too few points to mean anything */
+  const mx = mean(xs), my = mean(ys);
+  let sxy = 0, sxx = 0, syy = 0;
+  for(let i=0; i<xs.length; i++){
+    sxy += (xs[i]-mx)*(ys[i]-my);
+    sxx += (xs[i]-mx)*(xs[i]-mx);
+    syy += (ys[i]-my)*(ys[i]-my);
+  }
+  return (sxx && syy) ? sxy/Math.sqrt(sxx*syy) : null;
+}
+function chartCorrelation(codes, W, onPick){
+  W = W || 640;
+  const n = codes.length;
+  const labs = codes.map(metricLabel);
+  /* The row-label column takes what it needs, capped so the cells stay square
+     enough to read; the cell size then follows from what is left. */
+  const L = clampN(Math.ceil(maxTextW(labs, 10, false)) + CM.pad, 90, Math.round(W*0.34));
+  const T = 34, B = 6, R = CM.right;
+  /* Cells stay square and stay modest: a correlation matrix stretched to fill a
+     1200px panel would be a wall of enormous squares. The block is centred
+     instead, labels and all, so the leftover width reads as margin rather than
+     as an empty half-panel. */
+  const cell = Math.max(14, Math.min(46, Math.floor((W - L - R) / n)));
+  const gridW = cell * n;
+  const G = L + Math.max(0, Math.floor((W - L - R - gridW) / 2));
+  const H = T + cell*n + B;
+  const s = svgEl(W, H, 'Correlation between selected metrics');
+  if(n < 2){ txt(s, W/2, H/2, 'Select at least two metrics', 'tick', null, 'middle'); return s; }
+
+  const rowLab = labs.map(l => ellipsize(l, L - CM.pad, 10, false));
+  /* Column headers are the field codes: a rotated full name column would cost
+     more height than the matrix itself and still not be readable. */
+  codes.forEach((c,j) => {
+    const t = txt(s, 0, 0, c, 'tick', null, 'start');
+    t.setAttribute('transform', 'translate(' + (G + j*cell + cell/2 + 3) + ',' + (T-6) + ') rotate(-90)');
+  });
+
+  for(let i=0; i<n; i++){
+    txt(s, G-CM.pad, T + i*cell + cell/2 + 3.5, rowLab[i], 'barlab',
+      'fill:'+cssv('--text-secondary'), 'end');
+    for(let j=0; j<n; j++){
+      const x = G + j*cell, y = T + i*cell;
+      const r = i === j ? 1 : corrOf(codes[i], codes[j]);
+      if(r == null){
+        mk('rect',{x:x, y:y, width:cell-1, height:cell-1, fill:cssv('--surface-sunk')}, s);
+        continue;
+      }
+      /* Diverging on sign, saturation on strength. Two hues from the existing
+         series palette rather than a new ramp. */
+      mk('rect',{x:x, y:y, width:cell-1, height:cell-1,
+        fill: r >= 0 ? cssv('--series-1') : cssv('--series-2'),
+        'fill-opacity': (0.10 + Math.abs(r)*0.80).toFixed(3)}, s);
+      if(cell >= 26 && i !== j)
+        txt(s, x + cell/2, y + cell/2 + 3.5, (Math.abs(r) >= 0.995 ? '1' : r.toFixed(2).replace(/^0\./,'.').replace(/^-0\./,'-.')),
+          'dlab', 'fill:'+(Math.abs(r) > 0.62 ? cssv('--surface-1') : cssv('--text-primary'))+';font-size:9px', 'middle');
+
+      const hit = mk('rect',{x:x, y:y, width:cell-1, height:cell-1, class:'hit'}, s);
+      hit.addEventListener('mousemove', ev => tipShow(
+        '<div class="tt">'+esc(labs[i])+'<br>vs '+esc(labs[j])+'</div>' +
+        (i === j ? '<div class="tr"><span>Same metric</span><span>—</span></div>'
+                 : '<div class="tr"><span>Correlation</span><span>'+r.toFixed(2)+'</span></div>' +
+                   '<div class="tr"><span>Direction</span><span>'+
+                     (Math.abs(r) < 0.3 ? 'little or none' :
+                      r > 0 ? 'move together' : 'move opposite')+'</span></div>' +
+                   '<div class="tfoot">Click to plot this pair</div>'), ev));
+      hit.addEventListener('mouseleave', tipHide);
+      if(i !== j && onPick)
+        hit.addEventListener('click', () => { tipHide(); onPick(codes[j], codes[i]); });
+    }
+  }
+  mk('rect',{x:G, y:T, width:gridW-1, height:cell*n-1, fill:'none',
+    stroke:cssv('--border-strong')}, s);
   return s;
 }
 

@@ -27,11 +27,14 @@ stored anywhere but your browser.
 
 | View | Answers |
 |---|---|
-| **Overview** | Where do we stand right now? Rank, gap to benchmark, position across every selected metric. |
-| **Trends** | How have the numbers and our ranking moved, quarter by quarter? |
-| **Explore** | How do any two metrics relate across the group? |
+| **Overview** | Where do we stand right now? Rank, the trend against the peer range, position across every selected metric. |
+| **Trends** | How have the numbers and our ranking moved, quarter by quarter, against named competitors? |
+| **Explore** | How do metrics relate to each other? Scatter any pair, see who sits where, and read the correlation matrix. |
 | **Market** | What share of county deposits do we hold, and against whom? |
-| **Compare** | The full sortable matrix — every metric, every bank — with the selected row drawn as ranked bars underneath. |
+| **Compare** | The full sortable matrix — every metric, every bank — with the same figures shaded by standing underneath. |
+
+No chart appears on two views: each page answers a different question rather than
+restating the last one.
 
 **200 metrics** — 45 core (balance sheet, earnings, performance ratios, capital,
 asset quality), 17 loan-composition and concentration items, and the full

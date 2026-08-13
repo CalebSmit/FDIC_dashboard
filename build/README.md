@@ -156,6 +156,41 @@ Two guards apply when an interim quarter is selected:
 Loading a shared setup whose period is outside the current scope widens the scope
 to `all` rather than silently snapping to a different quarter.
 
+## One visual per question
+
+No chart is drawn on two views. That is a deliberate constraint, and it is
+testable: every chart sets an `aria-label`, so collecting
+`#dash svg.chart[aria-label]` per view and intersecting the sets must come back
+empty. Three overlaps existed and were resolved rather than tolerated:
+
+| Was on | Now |
+|---|---|
+| `chartPosition` on Overview **and** Explore | Overview only |
+| `chartRank` on Overview **and** Explore **and** Compare | Overview only |
+| `chartTrend` identical on Overview **and** Trends | Overview draws the quartile band, Trends draws pinned competitors |
+
+What replaced them:
+
+- **Explore → "Who sits where"**, a table naming every bank with both plotted
+  values and which side of each median it falls on. The scatter labels only the
+  focus bank, because labelling nine points makes it unreadable; this is where
+  the names live.
+- **Explore → "How the metrics move together"**, a correlation matrix across the
+  banks at the selected period. The scatter answers one pair; the matrix says
+  which pairs are worth plotting. Clicking a cell loads that pair into the
+  scatter above. Checked against an independent Pearson computation: 144
+  correlations, agreement to 1e-12, matrix symmetric.
+- **Compare → "Standing at a glance"**, the whole matrix as a heatmap. A ranking
+  chart there repeated the Overview panel exactly; this visualises all 12 rows
+  instead of one. Shading is **direction-aware** — `betterDir()` inverts the ramp
+  on lower-is-better ratios, so the darkest cell on efficiency ratio is the bank
+  at 28.32%, not the one at 56.54%. Verified on `ASSET` (higher better),
+  `EEFFR` and `NPERFV` (lower better).
+- **Overview → trend against the peer range**, the same `chartTrend` with
+  `opts.band`, shading the peer 25th–75th percentile each quarter. It answers
+  "inside the pack or outside it" where Trends answers "how do we compare with
+  that named bank".
+
 ## Schedule RC-T is an annual filing
 
 The whole trust and fiduciary catalogue comes from Call Report **Schedule RC-T**,
