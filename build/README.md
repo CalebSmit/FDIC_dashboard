@@ -276,3 +276,21 @@ screenful of controls.
 `min-width:auto`, which resolves to its min-content width, and a `<select>` is
 as wide as its longest option. Without it the rail was 870px inside an 820px
 viewport and the whole page scrolled sideways.
+
+## Panel spacing
+
+`--gap-block` (12px) is the single vertical rhythm value. `.tiles`, `.grid2`,
+`.grid3` and `.notice` use it for their bottom margin, `.grid2`/`.grid3` also
+use it as their column gap, and `#dash > .card` uses it so panels stacked
+straight onto the dashboard are separated.
+
+`.card` itself carries no margin: cards inside a grid are spaced by the grid's
+gap, and a margin there would only pad the bottom of the track. The
+`#dash > .card` selector limits the margin to direct children, and
+`:last-of-type` drops it before the footnotes, which supply their own top
+margin and rule.
+
+Before this, `.card` had no margin at all, so any two cards appended as siblings
+sat flush against each other — most visible on the Market view, which stacks
+four panels, and also affecting Overview (position strip against the profile)
+and Trends (pinned peers against the small multiples).

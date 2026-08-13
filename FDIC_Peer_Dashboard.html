@@ -81,6 +81,9 @@
 
   /* Geometry: near-square corners, hairlines instead of elevation. */
   --r-sm:2px; --r-md:3px; --r-lg:4px;
+  /* Vertical rhythm between panels. Every block on the dashboard uses this
+     one value so nothing ends up flush against its neighbour. */
+  --gap-block:12px;
   --sh-1:none;
   --sh-2:none;
   --sh-3:0 10px 26px rgba(11,20,30,.22), 0 1px 3px rgba(11,20,30,.16);
@@ -441,7 +444,7 @@ kbd{font-family:var(--font-mono);font-size:var(--t-1);background:var(--surface-s
    Stat tiles — the focused metric carries more weight than the rest
    ========================================================================== */
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:0;
-  margin-bottom:11px;border:1px solid var(--border-strong);background:var(--border)}
+  margin-bottom:var(--gap-block);border:1px solid var(--border-strong);background:var(--border)}
 .tile{
   background:var(--surface-1);border:0;border-radius:0;
   padding:9px 12px 10px;cursor:pointer;position:relative;overflow:hidden;min-width:0;
@@ -499,12 +502,19 @@ kbd{font-family:var(--font-mono);font-size:var(--t-1);background:var(--surface-s
 /* align-items:start lets each panel hug its own chart. Stretching them to a
    common height left the shorter one with a band of empty space below the
    drawing. */
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(430px,100%),1fr));gap:10px;margin-bottom:10px;align-items:start}
-.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(292px,100%),1fr));gap:10px;margin-bottom:10px;align-items:start}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(430px,100%),1fr));
+  gap:var(--gap-block);margin-bottom:var(--gap-block);align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(292px,100%),1fr));
+  gap:var(--gap-block);margin-bottom:var(--gap-block);align-items:start}
 .card{
   background:var(--surface-1);border:1px solid var(--border-strong);border-radius:var(--r-md);
   padding:10px 11px 11px;min-width:0;position:relative;
 }
+/* Panels stacked straight onto the dashboard need their own separation. Cards
+   inside a grid are spaced by its gap instead, so they are excluded — a margin
+   there would only pad the bottom of the track. */
+#dash > .card{margin-bottom:var(--gap-block)}
+#dash > .card:last-of-type{margin-bottom:0}
 /* Registration marks. Two corners, not four — enough to read as an instrument
    panel, not enough to become a frame. */
 .card::before,.card::after{
@@ -669,7 +679,7 @@ textarea.inp{font-family:var(--font-mono);font-size:var(--t-2);resize:vertical}
    ========================================================================== */
 .notice{border:1px solid var(--border-strong);border-left:3px solid var(--serious);
   border-radius:0;background:var(--surface-1);
-  padding:7px 10px;font-size:var(--t-2);margin-bottom:10px;color:var(--text-secondary);
+  padding:7px 10px;font-size:var(--t-2);margin-bottom:var(--gap-block);color:var(--text-secondary);
   display:flex;gap:7px;align-items:flex-start}
 .notice svg{width:13px;height:13px;color:var(--serious);flex:0 0 auto;margin-top:1px}
 .notice b{color:var(--text-primary)}
