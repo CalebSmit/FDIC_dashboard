@@ -105,7 +105,12 @@ const CORE_METRICS = [
   {code:'NTLNLS',   label:'Net charge-offs',                       cat:'Asset quality', unit:'usd'},
   {code:'NPERFV',   label:'Noncurrent assets plus OREO to assets', cat:'Asset quality', unit:'pct'},
   {code:'NCLNLSR',  label:'Noncurrent loans to loans',             cat:'Asset quality', unit:'pct'},
-  {code:'NALTOT',   label:'Total noncurrent loans and leases',     cat:'Asset quality', unit:'usd'},
+  /* NALTOT ("total noncurrent loans and leases") was withdrawn by the FDIC after
+     30 June 2023 and returns null at every period since, so it is replaced by the
+     two components that are still filed. Their sum is noncurrent, and it ties to
+     NCLNLSR and NPERFV exactly. */
+  {code:'NAASSET',  label:'Assets in nonaccrual status',           cat:'Asset quality', unit:'usd'},
+  {code:'P9ASSET',  label:'Assets past due 90+ days, accruing',    cat:'Asset quality', unit:'usd'},
   {code:'ORE',      label:'Other real estate owned',               cat:'Asset quality', unit:'usd'},
 
   {code:'LNRE',     label:'Real estate loans, total',              cat:'Loan composition', unit:'usd'},
@@ -175,6 +180,17 @@ function isYtdFlow(code){
    mistake to make on an interim quarter. */
 const ytdMonths = d => d ? Number(d.slice(4,6)) : 12;
 const isYearEnd  = d => !!d && d.slice(4,6) === '12';
+
+/* Call Report Schedule RC-T -- the whole trust and fiduciary section -- is filed
+   once a year, every December, by every bank under the FDIC's quarterly
+   threshold. For the quarters in between the API publishes a hard 0 rather than
+   an empty field, so an untreated interim quarter shows a bank with $768M of
+   fiduciary assets at year-end holding $0 in March. That is a filing convention,
+   not a balance. See rctBlank(). */
+const RCT_CATS = {'Structure & Powers':1, 'Fiduciary Assets':1, 'Fiduciary Income':1,
+  'Account Counts':1, 'Managed Assets':1, 'Non-Managed Assets':1,
+  'Collective Investment Funds':1, 'Losses & Recoveries':1};
+const isRctItem = code => !!RCT_CATS[(M_BY_CODE[code] || {}).cat];
 /* True when the plotted window mixes quarters, which is when the reset shows. */
 function windowMixesQuarters(){
   const qs = {};
@@ -191,7 +207,7 @@ const METRIC_SETS = [
   {id:'balance',name:'Balance sheet', codes:[
     'ASSET','DEP','COREDEP','DEPINS','DEPUNINS','LNLSNET','LNLSGR','SC','EQTOT','LNLSDEPR']},
   {id:'risk',   name:'Credit & capital', codes:[
-    'LNATRESR','NTLNLSR','NPERFV','NCLNLSR','NALTOT','ORE','EQV','RBC1AAJ','IDT1RWAJR','RBCRWAJ']},
+    'LNATRESR','NTLNLSR','NPERFV','NCLNLSR','NAASSET','P9ASSET','ORE','EQV','RBC1AAJ','IDT1RWAJR','RBCRWAJ']},
   {id:'loans',  name:'Loan mix', codes:[
     'LNLSGR','LNAG','LNREAG','LNCI','LNRENRES','LNRERES','LNRECONS','LNREMULT','LNCON',
     'LNAGR','LNCIR','NCLNLSR']},
@@ -441,6 +457,10 @@ async function apiGet(path, params){
     throw new Error('FDIC rate limit reached. Wait about a minute, or add a free api.data.gov key.');
   if(res.status >= 500)
     throw new Error('The FDIC service returned an error (HTTP ' + res.status + '). This is on their end — try again shortly.');
+  if(res.status === 401 || res.status === 403)
+    throw new Error('The FDIC rejected the API key (HTTP ' + res.status + '). Open the key ' +
+      'menu in the header and either correct it or clear it — the dashboard works without ' +
+      'a key at a lower request limit.');
   if(!res.ok)
     throw new Error('FDIC API returned HTTP ' + res.status + '.');
 
@@ -592,12 +612,33 @@ const bankName = c => (S.inst[String(c)] && S.inst[String(c)].NAME) || ('Cert ' 
 const shortName = (c,n) => { const s = bankName(c); return s.length > (n||22) ? s.slice(0,(n||22)-1) + '…' : s; };
 const isInactive = c => String((S.inst[String(c)]||{}).ACTIVE) === '0';
 
-/* raw reported value */
-function raw(cert, code, dte){
-  const rec = S.fin[String(cert)] && S.fin[String(cert)][dte || S.repdte];
+/* Reads a field straight out of the fetched response, with no interpretation.
+   Used by rctBlank(), which must not recurse through raw(). */
+function field(cert, code, d){
+  const rec = S.fin[String(cert)] && S.fin[String(cert)][d];
   if(!rec) return null;
   const v = rec[code];
   return (v == null || v === '' || !isFinite(v)) ? null : Number(v);
+}
+/* True when a zero should be read as "did not file this quarter" rather than as
+   a balance of nothing: an RC-T item, at an interim quarter, for a bank that
+   filed a real figure at the year-end anchoring this window. A bank with no
+   trust business files zero in December too, so its zeros are left alone. */
+function rctBlank(cert, code, d){
+  if(isYearEnd(d) || !isRctItem(code)) return false;
+  const P = S.fetchPeriods;
+  for(let j = P.indexOf(d); j >= 0; j--){
+    if(!isYearEnd(P[j])) continue;
+    const y = field(cert, code, P[j]);
+    return y != null && y !== 0;
+  }
+  return false;
+}
+/* raw reported value */
+function raw(cert, code, dte){
+  const d = dte || S.repdte;
+  const v = field(cert, code, d);
+  return (v === 0 && rctBlank(cert, code, d)) ? null : v;
 }
 /* period offset helper on the full fetched window */
 function shift(dte, backQuarters){
@@ -704,9 +745,14 @@ function varies(code){
   const vs = allCerts().map(c => val(c, code)).filter(v => v != null);
   return new Set(vs).size > 1;
 }
+/* The headline charts are about the focus bank, so a metric it did not report
+   makes an empty panel however much the peers vary. At an interim quarter that
+   rules out most of the trust set, which is filed annually. */
+const usableAsPrimary = code => varies(code) && val(S.focus.CERT, code) != null;
 function pickPrimary(){
   const pref = ['ASSET','TFRA','NETINC','ROA','TTMA','IFIDUC','NFAA'];
-  for(const p of pref) if(S.metrics.indexOf(p) >= 0 && varies(p)) return p;
+  for(const p of pref) if(S.metrics.indexOf(p) >= 0 && usableAsPrimary(p)) return p;
+  for(const c of S.metrics) if(usableAsPrimary(c)) return c;
   for(const c of S.metrics) if(varies(c)) return c;
   return S.metrics[0];
 }

@@ -209,7 +209,10 @@ async function build(){
     if(!got) throw new Error('The FDIC returned no financial data for this group and period. ' +
       'Try an earlier report period.');
 
-    if(!S.primary || S.metrics.indexOf(S.primary) < 0) S.primary = pickPrimary();
+    /* Also re-pick when the carried-over focus metric has nothing to show at the
+       new period — changing the date must not leave the headline charts blank. */
+    if(!S.primary || S.metrics.indexOf(S.primary) < 0 ||
+       val(S.focus.CERT, S.primary) == null) S.primary = pickPrimary();
     S.market = {loaded:false, loading:false, error:null, year:null, counties:[], sel:null,
                 countyRows:{}, trend:{}, branches:[], events:[]};
     S.built = true;
@@ -714,8 +717,21 @@ function initRail(){
         trust:$('cTrust').checked, active:$('cActive').checked
       });
       const rows = res.rows.filter(b => !S.focus || String(b.CERT) !== String(S.focus.CERT));
+      /* Spell out the filters that were actually applied. "Only banks with trust
+         powers" halves the universe in most states and is easy to leave on
+         without noticing, which is how a peer group ends up quietly incomplete. */
+      const applied = [];
+      if(states.length) applied.push(states.join('/'));
+      if(min != null || max != null)
+        applied.push((min != null ? fmt(min,'usd') : 'any') + '–' +
+                     (max != null ? fmt(max,'usd') : 'any') + ' assets');
+      if($('cClass').value) applied.push('charter ' + $('cClass').value);
+      if($('cSpec').value)  applied.push($('cSpec').selectedOptions[0].textContent.trim());
+      if($('cTrust').checked) applied.push('<b>trust powers only</b>');
+      if($('cActive').checked) applied.push('active only');
       setStatus(st, '<b>' + res.total + '</b> institution' + (res.total === 1 ? '' : 's') + ' matched' +
         (res.total > res.rows.length ? ' — showing the largest ' + res.rows.length + '.' : '.') +
+        (applied.length ? ' Filters: ' + applied.join(' · ') + '.' : '') +
         ' Tick the ones to compare against.', 'ok');
       renderList(host, rows, b => S.peers.some(p => String(p.CERT) === String(b.CERT)),
         togglePeer, false, 'Largest first');

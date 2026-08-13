@@ -558,9 +558,21 @@ function viewMarket(d){
     c.innerHTML += '<p class="hint" style="color:var(--critical)">' + esc(M.error) + '</p>';
     d.appendChild(c); return;
   }
-  if(!M.loaded || !M.counties.length){
+  /* The survey is fetched lazily, normally on the first switch to this view.
+     Rebuilding while already here clears it without going through that switch,
+     which used to leave the page claiming the bank has no branches. Asking for
+     the load from the view itself makes it self-healing however it is reached. */
+  if(!M.loaded){
+    loadMarket();
+    const c = card('Deposit market share', 'Loading branch deposits from the FDIC Summary of Deposits…');
+    c.innerHTML += '<p class="hint"><span class="spin"></span> This survey is separate from the ' +
+      'quarterly Call Report and is fetched only when this view is opened.</p>';
+    d.appendChild(c); return;
+  }
+  if(!M.counties.length){
     const c = card('Deposit market share', '');
-    c.innerHTML += '<p class="hint">No branch records found for this institution.</p>';
+    c.innerHTML += '<p class="hint">No branch records found for this institution in the ' +
+      (M.year ? '30 June ' + M.year + ' ' : '') + 'Summary of Deposits.</p>';
     d.appendChild(c); return;
   }
 
@@ -782,6 +794,21 @@ function render(){
       'statistics here are computed from the ' + (allCerts().length - late.length) +
       ' banks that did file. Use the previous quarter for a complete group.</div>';
     d.appendChild(n);
+  }
+  /* Trust and fiduciary detail is an annual filing. */
+  if(!isYearEnd(S.repdte) && S.metrics.some(isRctItem)){
+    const n = S.metrics.filter(isRctItem).length;
+    const nb = S.metrics.filter(c => isRctItem(c) &&
+      allCerts().some(ct => rctBlank(ct, c, S.repdte))).length;
+    const x = document.createElement('div');
+    x.className = 'notice';
+    x.innerHTML = ICO.warn + '<div><b>Trust and fiduciary figures are filed once a year, ' +
+      'every December.</b> ' + n + ' of the selected metrics come from Call Report ' +
+      'Schedule RC-T' + (nb ? ', and ' + nb + ' of them are not filed by this group at ' +
+      prettyDate(S.repdte) : '') + '. The FDIC publishes a zero for the quarters in ' +
+      'between rather than leaving the field empty, so those show as “—” here instead ' +
+      'of as a balance of nothing. <b>Use a year-end period for trust comparisons.</b></div>';
+    d.appendChild(x);
   }
   /* Year-to-date figures at an interim date cover part of a year. */
   if(!isYearEnd(S.repdte) && S.metrics.some(isYtdFlow)){

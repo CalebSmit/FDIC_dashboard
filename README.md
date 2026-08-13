@@ -116,6 +116,10 @@ chart-fitting system, and the reasoning behind the data caveats below.
 - **A newly published quarter can be incomplete.** Banks file over several
   weeks. If any bank in the group has no filing at the selected date, it is named
   and the peer statistics say how many banks they were computed from.
+- **Trust and fiduciary figures are filed once a year, in December.** The FDIC
+  publishes a zero for the quarters in between rather than an empty field. Those
+  are shown as "—", not as a balance of nothing, and a banner says so. Use a
+  year-end period for trust comparisons.
 - **Peer statistics exclude your own bank**, so "peer median" describes the
   comparison group rather than the group plus you.
 - **Ratios are taken as the FDIC publishes them** and are not recalculated.

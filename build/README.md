@@ -156,6 +156,58 @@ Two guards apply when an interim quarter is selected:
 Loading a shared setup whose period is outside the current scope widens the scope
 to `all` rather than silently snapping to a different quarter.
 
+## Schedule RC-T is an annual filing
+
+The whole trust and fiduciary catalogue comes from Call Report **Schedule RC-T**,
+which banks under the FDIC's quarterly threshold file **once a year, every
+December**. For the quarters in between the API returns a hard **0**, not an
+empty field. Untreated, that is worse than a gap: Peoples Bank reports $768.5M of
+fiduciary assets at 31 December 2025 and `0` at 31 March 2026, which renders as
+`$0` and drags the peer median to zero.
+
+`rctBlank()` in `03_core.js` decides when a zero is that artefact. A zero is read
+as *not filed* when all three hold:
+
+1. the field belongs to an RC-T category (`RCT_CATS`),
+2. the period is not a December, and
+3. the same bank filed a **non-zero** figure at the most recent year-end inside
+   the fetched window.
+
+Condition 3 is what keeps it honest. A bank with no trust business files zero in
+December too, so its zeros are genuine and are left alone; a bank large enough to
+file quarterly has real interim figures, so the rule never fires on it. Measured
+on the Northwest Iowa group at 31 March 2026: of nine banks, two file quarterly
+(kept), three have no trust business (kept as zero), four are annual filers
+(blanked). Year-end figures are untouched — verified identical before and after.
+
+A banner names how many of the selected metrics are RC-T and how many of them
+this group did not file at the selected date, and says to use a year-end period.
+`pickPrimary()` also refuses a focus metric the focus bank did not report, so
+changing to an interim quarter cannot leave the headline charts empty.
+
+## Withdrawn fields
+
+`NALTOT` ("total noncurrent loans and leases") was withdrawn by the FDIC after
+**30 June 2023** and returns null at every period since. It shipped in the
+Credit & capital starting set, where it rendered as a row of dashes. It is
+replaced by the two components still filed:
+
+| Field | Meaning |
+|---|---|
+| `NAASSET` | Assets in nonaccrual status |
+| `P9ASSET` | Assets past due 90+ days and still accruing |
+
+Their sum is noncurrent assets. Checked across the group at 31 December 2025:
+`(NAASSET + P9ASSET) / LNLSGR` reproduces `NCLNLSR` and
+`(NAASSET + P9ASSET + ORE) / ASSET` reproduces `NPERFV`, both to zero error on
+all nine banks — which is what confirms the two replacements are the right
+fields and are labelled correctly.
+
+Six RC-T "foreign offices" memo fields (`TITOTF`, `TNMAF`, `TMAF`, `TNMNUMF`,
+`TMAFNUM`, and their kin) are null for every domestic community bank. They are
+left in the full 138-item set for completeness — that set is explicitly the whole
+schedule — but they will always show as `—` for a bank with no foreign offices.
+
 ## Verification
 
 The statistics were checked against an independent computation: nine banks,
