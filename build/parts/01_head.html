@@ -496,8 +496,14 @@ kbd{font-family:var(--font-mono);font-size:var(--t-1);background:var(--surface-s
 /* align-items:start lets each panel hug its own chart. Stretching them to a
    common height left the shorter one with a band of empty space below the
    drawing. */
+/* Paired panels share a baseline. A chart's height comes from its own content,
+   so two side by side used to end at different points and leave a hole under the
+   shorter one; stretching the cards squares that off, and letting a table inside
+   grow means the space goes to content rather than sitting empty. */
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(430px,100%),1fr));
-  gap:var(--gap-block);margin-bottom:var(--gap-block);align-items:start}
+  gap:var(--gap-block);margin-bottom:var(--gap-block);align-items:stretch}
+.grid2>.card{display:flex;flex-direction:column}
+.grid2>.card>.tablewrap{flex:1 1 auto}
 .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(292px,100%),1fr));
   gap:var(--gap-block);margin-bottom:var(--gap-block);align-items:start}
 .card{

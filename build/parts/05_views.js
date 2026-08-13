@@ -416,7 +416,9 @@ function viewOverview(d){
     esc(bankName(S.focus.CERT)) + ' against ' + (allCerts().length - 1) + ' peers at ' +
     prettyDate(S.repdte) + '. Click a bar to pin that bank into Trends.');
   c1._tools.appendChild(metricPicker(S.primary, v => { S.primary = v; render(); }));
-  chartBox(c1, w => chartRank(S.primary, w), 'Peer ranking — ' + metricLabel(S.primary));
+  /* Asked for the height of the trend panel beside it so the pair ends level. */
+  chartBox(c1, w => chartRank(S.primary, w, {h: trendHeight(w)}),
+    'Peer ranking — ' + metricLabel(S.primary));
   c1.appendChild(legendRow([
     {color:FOCUS_COLOR(), label:bankName(S.focus.CERT)},
     {color:PEER_COLOR(),  label:'Peer banks'},
@@ -478,7 +480,8 @@ function viewTrends(d){
     'Position within the group each quarter, best at the top. Your bank and any ' +
     'pinned peers are drawn in full; everyone else stays faint for context.' +
     ytdNote(S.primary));
-  chartBox(c2, w => chartBump(S.primary, w), 'Rank over time — ' + metricLabel(S.primary));
+  chartBox(c2, w => chartBump(S.primary, w, {h: trendHeight(w)}),
+    'Rank over time — ' + metricLabel(S.primary));
   g.appendChild(c2);
   d.appendChild(g);
 

@@ -200,6 +200,30 @@ What replaced them:
   "inside the pack or outside it" where Trends answers "how do we compare with
   that named bank".
 
+## Paired panels end level
+
+A chart's height comes from its own content, so two panels side by side in a
+`.grid2` used to finish at different points and leave a hole under the shorter
+one — 104px under the Overview ranking chart, 117px under Trends' rank-over-time,
+190px under the Explore table. Fixed in two layers:
+
+- `.grid2` stretches its cards to a common height, and a `.tablewrap` inside one
+  grows with it, so the space goes to content rather than sitting empty.
+- The charts themselves are asked to fill it. `trendHeight(W)` is shared, and
+  `chartRank`/`chartBump` accept `opts.h` as a height to *fill* — rows spread
+  towards it, but a group large enough to need more space still gets it, so a
+  25-bank ranking is unaffected.
+
+Measured after: all four paired rows finish within 0px of each other.
+
+The Compare heatmap is centred as a whole composition — label column and grid
+together — rather than centring the grid alone, which dragged the labels right
+and left a lopsided gap. Cells grow to 110px wide, with row height held to 34px:
+cells could be square, but sixteen square rows is taller than a laptop screen,
+and a panel called "at a glance" that has to be scrolled is not one. It fills
+66% of a 1790px card with margins balanced to within 9px — a centred figure, not
+a stretched one, because nine columns stretched across 1790px would be stripes.
+
 ## Schedule RC-T is an annual filing
 
 The whole trust and fiduciary catalogue comes from Call Report **Schedule RC-T**,

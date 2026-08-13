@@ -239,14 +239,25 @@ function sparkline(values, w, h, color){
 /* ==========================================================================
    Ranking bars
    ========================================================================== */
-function chartRank(code, W){
+/* Height of a trend panel at a given width. Shared so the ranking chart beside
+   it on the Overview can be asked for the same height and the pair ends level
+   instead of leaving a hundred pixels of hole under the shorter one. */
+const trendHeight = W => clampN(Math.round(W*0.40), 232, 330);
+
+function chartRank(code, W, opts){
+  opts = opts || {};
   W = W || 640;
   const unit = unitOf(code);
   const certs = allCerts();
   const rows = certs.map(c => ({cert:c, name:bankName(c), v:val(c,code)}))
     .sort((a,b) => (b.v==null ? -Infinity : b.v) - (a.v==null ? -Infinity : a.v));
 
-  const rowH = CM.rowH, padT = CM.top - 4, padB = CM.bottom - 4;
+  const padT = CM.top - 4, padB = CM.bottom - 4;
+  /* opts.h is a height to fill, not a height to obey: rows stretch towards it,
+     but a group large enough to need more space still gets it. */
+  const rowH = opts.h
+    ? clampN(Math.floor((opts.h - padT - padB) / Math.max(1, rows.length)), CM.rowH, 44)
+    : CM.rowH;
   /* Both gutters are measured: the name column from the longest bank name, the
      value column from the longest formatted figure. A wide unit setting such as
      "exact dollars" therefore widens the gutter instead of overflowing it. */
@@ -255,7 +266,7 @@ function chartRank(code, W){
   const names = rawNames.map(n => ellipsize(n, L - CM.pad, 10.5, false));
   const valLabels = rows.map(r => r.v == null ? 'not reported' : fmt(r.v, unit));
   const R = clampN(Math.ceil(maxTextW(valLabels, 10, true)) + CM.pad + 6, 44, Math.round(W*0.3));
-  const H = padT + rows.length*rowH + padB;
+  const H = Math.max(padT + rows.length*rowH + padB, opts.h || 0);
   const s = svgEl(W,H,'Ranking of '+metricTitle(code));
 
   const vals = rows.map(r => r.v).filter(v => v != null);
@@ -356,7 +367,7 @@ function chartTrend(code, W, opts){
 
   /* Height follows the width so a full-bleed panel does not end up a thin
      letterbox, and a narrow one does not end up a tall stripe. */
-  const H = opts.h || clampN(Math.round(W*0.40), 232, 330);
+  const H = opts.h || trendHeight(W);
   const T = CM.top, B = CM.bottom;
   const s = svgEl(W,H, (band ? 'Trend against the peer range of ' : 'Trend of ') + metricTitle(code));
   const flat = series.reduce((a,x) => a.concat(x.pts), [])
@@ -605,7 +616,8 @@ function chartScatter(xCode, yCode, W){
 /* ==========================================================================
    Rank over time
    ========================================================================== */
-function chartBump(code, W){
+function chartBump(code, W, opts){
+  opts = opts || {};
   W = W || 640;
   const P = S.activePeriods;
   const certs = allCerts();
@@ -620,7 +632,9 @@ function chartBump(code, W){
   });
 
   const N = certs.length;
-  const H = Math.max(210, CM.top + CM.bottom + N*19);
+  /* Matches the trend panel beside it; the rank scale is proportional to the
+     plot height, so the rows simply spread out. */
+  const H = Math.max(210, CM.top + CM.bottom + N*19, opts.h || 0);
   const T = CM.top + 6, B = CM.bottom;
   const rawNames = certs.map(c => bankName(c));
   const R = clampN(Math.ceil(maxTextW(certs.map(c => shortName(c,16)), 10.5, false)) + CM.endGap + 6,
@@ -710,17 +724,26 @@ function chartHeatmap(codes, W, onPickMetric){
   const certs = allCerts();
   const n = codes.length, m = certs.length;
   const labs = codes.map(metricLabel);
-  const names = certs.map(c => shortName(c, 22));
+  const names = certs.map(c => shortName(c, 20));
 
-  const L = clampN(Math.ceil(maxTextW(labs, 10, false)) + CM.pad, 110, Math.round(W*0.34));
-  const R = CM.right;
+  /* The row-label column is sized to the strings it holds, not to a share of the
+     panel, and the block that follows -- labels and grid together -- is centred
+     as one composition. Centring the grid alone drags the labels right with it
+     and leaves a lopsided gap down the left. */
+  const rowText = labs.map((l,i) => l + (betterDir(codes[i]) < 0 ? ' ▾' : ''));
+  const labW = clampN(Math.ceil(maxTextW(rowText, 10, false)), 90, Math.round(W*0.30));
   const T = clampN(Math.ceil(maxTextW(names, 10, false)) + 10, 60, 150);
-  /* Capped so cells stay tile-shaped. Left to fill a 1200px panel, nine banks
-     would each get a 130x22 stripe, which reads as a bar chart with no bars. */
-  const rowH = 26, B = 6;
-  const cellW = clampN(Math.floor((W - L - R) / m), 18, 72);
+  const B = 6, MARGIN = 8;
+  /* Cells grow to use the panel, capped so they stay tiles rather than stripes,
+     and the row height follows the width so the proportion holds at any size. */
+  const cellW = clampN(Math.floor((W - labW - CM.pad - MARGIN*2) / m), 18, 110);
+  /* Row height is held down deliberately. Cells could be square, but sixteen
+     square rows is taller than a laptop screen, and a panel called "at a glance"
+     that has to be scrolled is not one. */
+  const rowH  = clampN(Math.round(cellW * 0.30), 22, 34);
   const gridW = cellW * m;
-  const G = L + Math.max(0, Math.floor((W - L - R - gridW) / 2));
+  const X0 = Math.max(MARGIN, Math.floor((W - (labW + CM.pad + gridW)) / 2));
+  const G = X0 + labW + CM.pad;
   const H = T + n*rowH + B;
   const s = svgEl(W, H, 'Standing of every bank on every selected metric');
   if(!n || !m){ txt(s, W/2, H/2, 'Nothing selected', 'tick', null, 'middle'); return s; }
@@ -740,7 +763,7 @@ function chartHeatmap(codes, W, onPickMetric){
     const y = T + i*rowH;
     const isP = code === S.primary;
     const lab = txt(s, G-CM.pad, y + rowH/2 + 3.5,
-      ellipsize(labs[i] + (dir < 0 ? ' ▾' : ''), L - CM.pad, 10, false), 'barlab',
+      ellipsize(rowText[i], labW, 10, false), 'barlab',
       'cursor:pointer;font-weight:'+(isP?'650':'400')+
       ';fill:'+(isP?cssv('--accent'):cssv('--text-secondary')), 'end');
     lab.addEventListener('click', () => { if(onPickMetric) onPickMetric(code); });
