@@ -240,6 +240,9 @@ td.num,th,.profile dd,#tip .tr,.status,.hint{
   letter-spacing:.07em;text-transform:uppercase;display:flex;align-items:center;
 }
 .iconbtn:disabled{opacity:.35;cursor:not-allowed}
+/* A key in use is worth showing without a label: it changes the request ceiling
+   and it is the first thing to check when the FDIC starts refusing calls. */
+.iconbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.45)}
 
 /* ==========================================================================
    Shell

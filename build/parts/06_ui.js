@@ -255,11 +255,11 @@ function currentConfig(){
   };
 }
 function readCfgs(){
-  try{ return JSON.parse(localStorage.getItem(LS.cfgs) || '{}'); }catch(e){ return {}; }
+  try{ return JSON.parse(store.get(LS.cfgs) || '{}'); }catch(e){ return {}; }
 }
 function writeCfgs(o){
-  try{ localStorage.setItem(LS.cfgs, JSON.stringify(o)); }
-  catch(e){ toast('Browser storage is full or blocked; the setup was not saved.','err'); }
+  if(!store.set(LS.cfgs, JSON.stringify(o)))
+    toast('Browser storage is full or blocked; the setup was not saved.','err');
 }
 function refreshCfgList(){
   const o = readCfgs(), names = Object.keys(o).sort();
@@ -394,16 +394,77 @@ async function initPeriods(){
    Theme, key, view
    ========================================================================== */
 function initTheme(){
-  const saved = localStorage.getItem(LS.theme);
+  const saved = store.get(LS.theme);
   if(saved) document.documentElement.setAttribute('data-theme', saved);
   $('btnTheme').addEventListener('click', () => {
     const cur = document.documentElement.getAttribute('data-theme');
     const isDark = cur ? cur === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     const next = isDark ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem(LS.theme, next);
+    store.set(LS.theme, next);
     if(S.built) render();
   });
+}
+
+/* ==========================================================================
+   API key
+
+   Anonymous access is allowed about 120 requests a minute and a build uses
+   three to five, which is ample for one person. Several people in the same
+   office share one public address, so a busy morning can hit the ceiling --
+   and the rate-limit message tells them to add a key, so there has to be
+   somewhere to put one.
+   ========================================================================== */
+function initApiKey(){
+  S.apiKey = store.get(LS.key) || '';
+  syncKeyButton();
+  $('btnKey').addEventListener('click', openApiKey);
+}
+function syncKeyButton(){
+  const b = $('btnKey');
+  if(!b) return;
+  b.classList.toggle('on', !!S.apiKey);
+  b.title = S.apiKey
+    ? 'An API key is in use. Click to change or remove it.'
+    : 'No API key — anonymous access. Click to add one.';
+}
+async function openApiKey(){
+  const persists = store.available();
+  const r = await modal('FDIC API key',
+    '<p class="hint">The dashboard works without a key. Anonymous access is limited to ' +
+    'roughly 120 requests a minute across everyone sharing your internet connection, and ' +
+    'one build uses three to five. Add a free key from ' +
+    '<a href="https://api.data.gov/signup/" target="_blank" rel="noopener noreferrer">api.data.gov</a> ' +
+    'if several people here use it at once and you start seeing rate-limit messages.</p>' +
+    '<label class="fl" for="keyInput">Key</label>' +
+    '<input class="inp" id="keyInput" placeholder="Paste the key, or leave blank for anonymous" ' +
+    'autocomplete="off" spellcheck="false" value="' + esc(S.apiKey) + '">' +
+    '<p class="hint">' + (persists
+      ? 'Stored in this browser only. It is never sent anywhere except api.fdic.gov, and it is ' +
+        'not part of a shared link or an exported setup.'
+      : '<b>This browser is not allowing local storage</b>, so the key will apply to this tab ' +
+        'only and will be gone when you close it.') + '</p>',
+    [{label:'Save', act:'save', primary:true},
+     {label:'Use anonymous', act:'clear'},
+     {label:'Cancel', act:'__close'}]);
+  if(!r || r.act === '__close') return;
+  if(r.act === 'clear'){
+    S.apiKey = '';
+    store.del(LS.key);
+    syncKeyButton();
+    toast('Using anonymous access.','ok');
+    return;
+  }
+  const v = (qs('#keyInput', r.root).value || '').trim();
+  S.apiKey = v;
+  if(v){
+    const kept = store.set(LS.key, v);
+    toast(kept ? 'API key saved in this browser.' : 'Key applied for this tab; storage is blocked.','ok');
+  }else{
+    store.del(LS.key);
+    toast('Using anonymous access.','ok');
+  }
+  syncKeyButton();
 }
 /* SOD is a separate dataset from the Call Report, so it is fetched only when
    the Market view is actually opened rather than on every build. */
@@ -508,7 +569,7 @@ function setView(v, quiet){
   if(!quiet && S.built) render();
 }
 function saveLast(){
-  try{ localStorage.setItem(LS.last, JSON.stringify(currentConfig())); }catch(e){}
+  store.set(LS.last, JSON.stringify(currentConfig()));
 }
 
 /* ==========================================================================
@@ -885,6 +946,7 @@ function initKeyboard(){
    ========================================================================== */
 async function init(){
   initTheme();
+  initApiKey();
   initRail();
   initTopbar();
   initKeyboard();

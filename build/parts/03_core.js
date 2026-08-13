@@ -220,13 +220,14 @@ const METRIC_SETS = [
    groups the user saves in the app are kept in the browser and merged in. */
 function readSavedGroups(){
   try{
-    const a = JSON.parse(localStorage.getItem(LS.groups) || '[]');
+    const a = JSON.parse(store.get(LS.groups) || '[]');
     return Array.isArray(a) ? a : [];
   }catch(e){ return []; }
 }
 function writeSavedGroups(a){
-  try{ localStorage.setItem(LS.groups, JSON.stringify(a)); return true; }
-  catch(e){ toast('Browser storage is full or blocked; the group was not saved.','err'); return false; }
+  if(store.set(LS.groups, JSON.stringify(a))) return true;
+  toast('Browser storage is full or blocked; the group was not saved.','err');
+  return false;
 }
 const allPeerGroups = () => PEER_GROUPS.concat(readSavedGroups());
 
@@ -234,6 +235,22 @@ const SERIES_VARS = ['--series-1','--series-2','--series-3','--series-4','--seri
 const API = 'https://api.fdic.gov/banks';
 const LS = {key:'fdic.key', theme:'fdic.theme', cfgs:'fdic.configs', last:'fdic.last',
             groups:'fdic.groups'};
+
+/* Reading localStorage is not safe to do bare. A managed workstation with
+   third-party storage disabled, or some private-browsing configurations, make
+   every access throw SecurityError rather than return null -- and one unguarded
+   read during startup would leave the page blank with nothing to explain it.
+   Everything that touches storage goes through here. */
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+  del(k){ try{ localStorage.removeItem(k); return true; }catch(e){ return false; } },
+  /* True when the browser will actually keep what we write. */
+  available(){
+    try{ localStorage.setItem('fdic.probe','1'); localStorage.removeItem('fdic.probe'); return true; }
+    catch(e){ return false; }
+  }
+};
 
 /* ==========================================================================
    State
@@ -458,9 +475,9 @@ async function apiGet(path, params){
   if(res.status >= 500)
     throw new Error('The FDIC service returned an error (HTTP ' + res.status + '). This is on their end — try again shortly.');
   if(res.status === 401 || res.status === 403)
-    throw new Error('The FDIC rejected the API key (HTTP ' + res.status + '). Open the key ' +
-      'menu in the header and either correct it or clear it — the dashboard works without ' +
-      'a key at a lower request limit.');
+    throw new Error('The FDIC rejected the API key (HTTP ' + res.status + '). Use the key ' +
+      'button in the header to correct it, or choose “Use anonymous” — the dashboard works ' +
+      'without a key at a lower request limit.');
   if(!res.ok)
     throw new Error('FDIC API returned HTTP ' + res.status + '.');
 

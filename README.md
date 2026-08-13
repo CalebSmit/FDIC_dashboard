@@ -146,9 +146,17 @@ data. Nothing is uploaded anywhere, and no analytics or third-party resources ar
 loaded — the page contains no external `src` or `href`.
 
 An **API key is optional.** Anonymous access is allowed roughly 120
-requests/minute and a full dashboard build uses three to five. A free key from
-[api.data.gov](https://api.data.gov/signup/) raises the ceiling. If entered, it
-stays in your browser only.
+requests/minute *across everyone sharing your internet connection*, and a full
+build uses three to five — ample for one person, worth a key if several people in
+the office use it at once. Add one with the key button in the header; a free key
+comes from [api.data.gov](https://api.data.gov/signup/). It is stored in your
+browser only, is sent to `api.fdic.gov` and nowhere else, and is deliberately
+left out of shared links and exported setups so a link never carries a
+credential.
+
+**Locked-down browsers are handled.** Where policy or private browsing blocks
+local storage, the dashboard still runs — saved setups, saved groups, the theme
+and the key simply do not persist between sessions, and the key dialog says so.
 
 ---
 

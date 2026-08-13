@@ -200,6 +200,32 @@ What replaced them:
   "inside the pack or outside it" where Trends answers "how do we compare with
   that named bank".
 
+## Browser storage
+
+Every read and write goes through `store` in `03_core.js`, never `localStorage`
+directly. On a managed workstation with third-party storage disabled — and in
+some private-browsing configurations — `localStorage.getItem` **throws**
+`SecurityError` rather than returning null. `initTheme()` is the first thing
+`init()` calls, so a single unguarded read there took the whole startup down and
+left a blank page with nothing on screen to explain it. That was a real failure
+mode for a bank workstation, not a hypothetical one.
+
+`store.get/set/del` swallow the exception and degrade to not persisting;
+`store.available()` probes with a real write so the key dialog can tell the user
+their key will only last for the tab. Verified by making every `localStorage`
+method throw and re-running startup: no uncaught errors, theme still toggles,
+every view still renders.
+
+## API key
+
+`S.apiKey` and `LS.key` existed and `apiGet` already sent `X-Api-Key`, but
+nothing ever set it — there was no way for a user to enter a key, while the help
+text, the README and the rate-limit message all implied there was. The header now
+has a key button that fills the gap.
+
+The key is deliberately **not** part of `currentConfig()`, so it never reaches a
+shared link or an exported setup file. Both are asserted in the test pass.
+
 ## Paired panels end level
 
 A chart's height comes from its own content, so two panels side by side in a
